@@ -10,22 +10,25 @@
 
 namespace AssetLoader {
 	struct Vertex {
-		glm::vec3 m_pos;
-		glm::vec2 m_tex;
-		glm::vec3 m_normal;
+		glm::vec3 position;
+		glm::vec2 tex_coord;
+		glm::vec3 normal;
 
 		inline Vertex() { }
 
-		inline Vertex(const glm::vec3& pos, const glm::vec2& tex, const glm::vec3& normal) {
-			m_pos = pos;
-			m_tex = tex;
-			m_normal = normal;
+		inline Vertex(const glm::vec3& pos, const glm::vec2& tex, const glm::vec3& nor) {
+			position  = pos;
+			tex_coord = tex;
+			normal    = nor;
 		}
 	};
 
 	struct MeshData {
-		std::vector<Vertex> vertices;
-		std::vector<u32>    indices;
+		u32     vertex_count;
+		Vertex* vertices;
+
+		u32     index_count;
+		u32*    indices;
 	};
 
 	const MeshData* load_mesh(const char* filename);

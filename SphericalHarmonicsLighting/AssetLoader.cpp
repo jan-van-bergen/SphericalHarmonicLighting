@@ -10,31 +10,34 @@ namespace AssetLoader {
 	
 	const MeshData* init_mesh_data(const aiMesh* mesh) {
 		MeshData* mesh_data = new MeshData();
+		mesh_data->vertex_count = mesh->mNumVertices;
+		mesh_data->index_count  = mesh->mNumFaces * 3;
 
-		const aiVector3D zero(0.0f, 0.0f, 0.0f);
+		mesh_data->vertices = new Vertex[mesh_data->vertex_count];
+		mesh_data->indices  = new u32   [mesh_data->index_count];
 
-		for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+		assert(mesh->HasTextureCoords(0));
+
+		for (u32 i = 0; i < mesh->mNumVertices; i++) {
 			const aiVector3D& pos = mesh->mVertices[i];
 			const aiVector3D& nor = mesh->mNormals[i];
-			const aiVector3D& tex = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][i] : zero;
+			const aiVector3D& tex = mesh->mTextureCoords[0][i];
 
-			Vertex v(
+			mesh_data->vertices[i] = Vertex(
 				glm::vec3(pos.x, pos.y, pos.z),
 				glm::vec2(tex.x, tex.y),
 				glm::vec3(nor.x, nor.y, nor.z)
 			);
-
-			mesh_data->vertices.emplace_back(v);
 		}
 
-		for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
+		for (u32 i = 0; i < mesh->mNumFaces; i++) {
 			const aiFace& face = mesh->mFaces[i];
 
 			assert(face.mNumIndices == 3);
 
-			mesh_data->indices.push_back(face.mIndices[0]);
-			mesh_data->indices.push_back(face.mIndices[1]);
-			mesh_data->indices.push_back(face.mIndices[2]);
+			mesh_data->indices[i*3    ] = face.mIndices[0];
+			mesh_data->indices[i*3 + 1] = face.mIndices[1];
+			mesh_data->indices[i*3 + 2] = face.mIndices[2];
 		}
 
 		return mesh_data;

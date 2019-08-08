@@ -28,8 +28,12 @@ bool ray_triangle_intersect(const Ray& ray, const Triangle& triangle) {
 		const glm::vec3& v_a = triangle.vertices[i        ] - intersection_point;
 		const glm::vec3& v_b = triangle.vertices[(i+1) % 3] - intersection_point;
 
+		float d = glm::dot(v_a, v_b);
+		float a = glm::length(v_a);
+		float b = glm::length(v_b);
+			
 		// Calculate the angle between these vectors
-		angle += acos(glm::dot(v_a, v_b) / (glm::length(v_a), glm::length(v_b)));
+		angle += acos(glm::clamp(glm::dot(v_a, v_b) / (glm::length(v_a) * glm::length(v_b)), -1.0f, 1.0f));
 	}
 
 	// If the sum of the angles is greater than 2 pi radians, then the point is inside the triangle
