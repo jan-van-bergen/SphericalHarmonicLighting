@@ -95,8 +95,7 @@ float SH(int l, int m, float theta, float phi) {
 } 
 
 // Fills an N*N*2 array with uniformly distributed SH samples across the unit sphere, using jittered stratification
-template<u32 Degree>
-void setup_spherical_samples(SHSample<Degree> samples[], u32 sqrt_n_samples, u32 n_bands) {
+void init_samples(SH_Sample samples[], u32 sqrt_n_samples, u32 n_bands) {
 	const float inv_sqrt_n_samples = 1.0f / sqrt_n_samples;
 
 	std::random_device random_device;
@@ -112,7 +111,7 @@ void setup_spherical_samples(SHSample<Degree> samples[], u32 sqrt_n_samples, u32
 
 			// Convert x and y to Spherical Coordinates
 			float theta = 2.0f * acos(sqrt(1.0f - x));
-			float phi = 2.0 * PI * y;
+			float phi   = 2.0f * PI * y;
 
 			samples[index].theta = theta;
 			samples[index].phi = phi;
@@ -121,8 +120,8 @@ void setup_spherical_samples(SHSample<Degree> samples[], u32 sqrt_n_samples, u32
 			samples[index].direction = glm::vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
 
 			// Precompute all SH coefficients for this sample
-			for (u32 l = 0; l < n_bands; l++) {
-				for (u32 m = -l; m <= l; m++) {
+			for (int l = 0; l < n_bands; l++) {
+				for (int m = -l; m <= l; m++) {
 					samples[index].coeffs[l * (l + 1) + m] = SH(l, m, theta, phi);
 				}
 			}
@@ -132,8 +131,7 @@ void setup_spherical_samples(SHSample<Degree> samples[], u32 sqrt_n_samples, u32
 	}
 }
 
-template<u32 Degree>
-void project_polar_function(PolarFunction fn, u32 n_samples, const SHSample<Degree> samples[], float result[]) {
+void project_polar_function(PolarFunction fn, u32 n_samples, const SH_Sample samples[], float result[]) {
 	// Weighed by the area of a 3D unit sphere
 	const float weight = 4.0f * PI;
 
@@ -143,14 +141,14 @@ void project_polar_function(PolarFunction fn, u32 n_samples, const SHSample<Degr
 		float phi   = samples[i].phi;
 
 		// For each SH coefficient
-		for (u32 n = 0; n < Degree; n++) {
+		for (u32 n = 0; n < SH_COEFFICIENT_COUNT; n++) {
 			result[n] += fn(theta, phi) * samples[i].coeffs[n];
 		}
 	}
 
 	// Divide the result by weight and number of samples
 	const float factor = weight / n_samples;
-	for (u32 i = 0; i < Degree; i++) {
+	for (u32 i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 		result[i] *= factor;
 	}
 } 

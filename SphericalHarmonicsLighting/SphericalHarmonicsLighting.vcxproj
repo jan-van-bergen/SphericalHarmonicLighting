@@ -183,8 +183,9 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
     <ClInclude Include="Display.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Ray.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="SphericalSamples.h" />
-    <ClInclude Include="TriangleMesh.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
@@ -192,8 +193,9 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Ray.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SphericalSamples.cpp" />
+    <ClCompile Include="Mesh.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -36,7 +36,10 @@
     <ClInclude Include="Ray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TriangleMesh.h">
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,7 +56,10 @@
     <ClCompile Include="AssetLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ray.cpp">
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
