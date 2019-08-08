@@ -2,7 +2,7 @@
 
 #define INVALID -1
 
-#define DATA_PATH(filename) "../Portal/Data/" filename
+#define DATA_PATH(filename) "../SphericalHarmonicsLighting/Data/" filename
 
 #define BOX_COUNT 100
 

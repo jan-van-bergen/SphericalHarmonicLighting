@@ -179,6 +179,7 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SphericalSamples.h" />
@@ -186,13 +187,8 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="Display.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="SphericalSamples.cpp" />
   </ItemGroup>
