@@ -182,6 +182,7 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
     <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Ray.h" />
     <ClInclude Include="SphericalSamples.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Util.h" />
@@ -190,6 +191,7 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="SphericalSamples.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
