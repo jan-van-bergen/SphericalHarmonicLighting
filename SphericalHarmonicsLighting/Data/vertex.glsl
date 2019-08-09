@@ -12,9 +12,9 @@ uniform samplerBuffer tbo_texture;
 uniform mat4 view_projection;
 
 void main() {
-	float r = texelFetch(tbo_texture, gl_VertexID * 3 + 0).r;
-	float g = texelFetch(tbo_texture, gl_VertexID * 3 + 1).r;
-	float b = texelFetch(tbo_texture, gl_VertexID * 3 + 2).r;
+	float r = texelFetch(tbo_texture, gl_VertexID * SH_COEFFICIENT_COUNT + 0).r;
+	float g = texelFetch(tbo_texture, gl_VertexID * SH_COEFFICIENT_COUNT + 1).r;
+	float b = texelFetch(tbo_texture, gl_VertexID * SH_COEFFICIENT_COUNT + 2).r;
 
 	frag_colour = vec3(r, g, b);
 	

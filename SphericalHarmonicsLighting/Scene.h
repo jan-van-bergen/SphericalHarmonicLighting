@@ -71,7 +71,8 @@ public:
 		camera = Camera();
 		camera.position    = glm::vec3(0.0f, 0.0f, 10.0f);
 		camera.orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-		camera.projection  = glm::perspectiveFov(RAD_TO_DEG(110.0f), 1600.0f, 900.0f, 0.1f, 100.0f); // @HARDCODED
+		camera.projection  = glm::perspective(DEG_TO_RAD(45.0f), 1600.0f / 900.0f, 0.1f, 100.0f);
+		//camera.projection  = glm::perspectiveFov(RAD_TO_DEG(110.0f), 1600.0f, 900.0f, 0.1f, 100.0f); // @HARDCODED
 	}
 
 	inline void init() {

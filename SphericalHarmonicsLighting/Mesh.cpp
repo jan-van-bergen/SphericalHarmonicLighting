@@ -75,7 +75,7 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 
 	glGenBuffers(1, &tbo);
 	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(coeffs), coeffs, GL_STATIC_DRAW);
+	glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * vertex_count * SH_COEFFICIENT_COUNT, coeffs, GL_STATIC_DRAW);
 	glGenTextures(1, &tbo_tex);
 
 	delete[] positions;
@@ -101,10 +101,13 @@ void Mesh::render(GLuint uni_tbo_texture) const {
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, tbo); // @TODO: check if this is required for every frame?
 	glUniform1i(uni_tbo_texture, 0);
 
+	glEnableVertexAttribArray(0);
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0); // Position
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, NULL);
 
+	glDisableVertexAttribArray(0);
 }
