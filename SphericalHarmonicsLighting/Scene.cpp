@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 
 Scene::Scene() {
-	Mesh mesh = Mesh(AssetLoader::load_mesh(DATA_PATH("box.obj")));
+	Mesh mesh = Mesh(AssetLoader::load_mesh(DATA_PATH("Monkey.obj")));
 	meshes.emplace_back(mesh);
 
 	camera = Camera();
@@ -20,6 +20,13 @@ void Scene::init() {
 	for (u32 i = 0; i < meshes.size(); i++) {
 		meshes[i].init(*this, SAMPLE_COUNT, samples);
 	}
+
+	// Project the light function in polar coordinates to obtain the light's SH coeffs
+	auto light_function = [](float theta, float phi) {
+		return (theta < PI / 6.0f) ? 1.0f : 0.0f;
+	};
+
+	project_polar_function(light_function, SAMPLE_COUNT, samples, light_coeffs);
 }
 
 void Scene::update(float delta, const u8* keys) {
@@ -46,7 +53,9 @@ void Scene::update(float delta, const u8* keys) {
 	camera.view_projection = camera.projection * create_view_matrix(camera.position, camera.orientation);
 }
 
-void Scene::render(GLuint uni_tbo_texture, GLuint uni_view_projection) const {
+void Scene::render(GLuint uni_tbo_texture, GLuint uni_view_projection, GLuint uni_light_coeffs) const {
+	glUniform1fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, light_coeffs);
+
 	glUniformMatrix4fv(uni_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
 
 	for (u32 i = 0; i < meshes.size(); i++) {

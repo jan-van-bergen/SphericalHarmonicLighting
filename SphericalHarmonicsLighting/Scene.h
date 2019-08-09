@@ -16,7 +16,7 @@
 
 #include "VectorMath.h"
 
-#define SQRT_SAMPLE_COUNT 50
+#define SQRT_SAMPLE_COUNT 50u
 #define SAMPLE_COUNT      (SQRT_SAMPLE_COUNT * SQRT_SAMPLE_COUNT)
 
 struct Plane {
@@ -70,7 +70,7 @@ public:
 
 	void update(float delta, const u8* keys);
 
-	void render(GLuint uni_tbo_texture, GLuint uni_view_projection) const;
+	void render(GLuint uni_tbo_texture, GLuint uni_view_projection, GLuint uni_light_coeffs) const;
 
 	bool intersects(const Ray& ray) const;
 
@@ -78,5 +78,7 @@ private:
 	Array<Mesh> meshes;
 
 	Camera camera;
+
+	float light_coeffs[SH_COEFFICIENT_COUNT];
 };
 
