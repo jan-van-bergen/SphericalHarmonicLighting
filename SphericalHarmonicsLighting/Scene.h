@@ -64,45 +64,15 @@ struct Camera {
 class Scene
 {
 public:
-	inline Scene() {
-		Mesh mesh = Mesh(AssetLoader::load_mesh(DATA_PATH("box.obj")));
-		meshes.emplace_back(mesh);
+	Scene();
 
-		camera = Camera();
-		camera.position    = glm::vec3(0.0f, 0.0f, 10.0f);
-		camera.orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-		camera.projection  = glm::perspective(DEG_TO_RAD(45.0f), 1600.0f / 900.0f, 0.1f, 100.0f);
-		//camera.projection  = glm::perspectiveFov(RAD_TO_DEG(110.0f), 1600.0f, 900.0f, 0.1f, 100.0f); // @HARDCODED
-	}
+	void init();
 
-	inline void init() {
-		SH_Sample samples[SAMPLE_COUNT];
-		init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
+	void update(float delta, const u8* keys);
 
-		for (u32 i = 0; i < meshes.size(); i++) {
-			meshes[i].init(*this, SAMPLE_COUNT, samples);
-		}
-	}
+	void render(GLuint uni_tbo_texture, GLuint uni_view_projection) const;
 
-	inline bool intersects(const Ray& ray) const {
-		for (u32 i = 0; i < meshes.size(); i++) {
-			if (meshes[i].intersects(ray)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	inline void render(GLuint uni_tbo_texture, GLuint uni_view_projection) {
-		camera.view_projection = camera.projection * create_view_matrix(camera.position, camera.orientation);
-
-		glUniformMatrix4fv(uni_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
-
-		for (u32 i = 0; i < meshes.size(); i++) {
-			meshes[i].render(uni_tbo_texture);
-		}
-	}
+	bool intersects(const Ray& ray) const;
 
 private:
 	Array<Mesh> meshes;

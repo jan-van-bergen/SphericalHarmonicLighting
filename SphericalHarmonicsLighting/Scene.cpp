@@ -1,34 +1,65 @@
 #include "Scene.h"
 
-bool Triangle::intersects(const Ray& ray) const {
-	float dot = glm::dot(ray.direction, plane.normal);
+#include <SDL2/SDL.h>
 
-	// If the plane's normal is orthogonal to the Ray's direction there can be no intersection
-	if (abs(dot) < 0.001f) return false;
+Scene::Scene() {
+	Mesh mesh = Mesh(AssetLoader::load_mesh(DATA_PATH("box.obj")));
+	meshes.emplace_back(mesh);
 
-	// Get the ray parameter where it meets the plane
-	float t = -(glm::dot(ray.origin, plane.normal) + plane.distance) / dot;
+	camera = Camera();
+	camera.position    = glm::vec3(0.0f, 0.0f, 10.0f);
+	camera.orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+	camera.projection  = glm::perspective(DEG_TO_RAD(45.0f), 1600.0f / 900.0f, 0.1f, 100.0f);
+	//camera.projection  = glm::perspectiveFov(RAD_TO_DEG(110.0f), 1600.0f, 900.0f, 0.1f, 100.0f); // @HARDCODED
+}
 
-	// If t is negative the intersection takes place behind the Ray
-	if (t <= 0.0f) return false;
+void Scene::init() {
+	SH_Sample samples[SAMPLE_COUNT];
+	init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
 
-	// Calculate the point of intersection between the Ray and Plane
-	glm::vec3 intersection_point = ray.origin + t * ray.direction;
+	for (u32 i = 0; i < meshes.size(); i++) {
+		meshes[i].init(*this, SAMPLE_COUNT, samples);
+	}
+}
 
-	// Check if the intersection point is inside the triangle
-	float angle = 0.0f;
+void Scene::update(float delta, const u8* keys) {
+	const float movement_speed = 10.0f;
+	const float rotation_speed =  2.0f;
 
-	// @SPEED: unroll loop
-	for (u32 i = 0; i < 3; i++)
-	{
-		// Calculate the vector from this vertex to the intersection point
-		const glm::vec3 v_a = vertices[i        ] - intersection_point;
-		const glm::vec3 v_b = vertices[(i+1) % 3] - intersection_point;
+	const glm::vec3& camera_right   = camera.orientation * glm::vec3(1.0f, 0.0f,  0.0f);
+	const glm::vec3& camera_up      = camera.orientation * glm::vec3(0.0f, 1.0f,  0.0f);
+	const glm::vec3& camera_forward = camera.orientation * glm::vec3(0.0f, 0.0f, -1.0f);
 
-		// Calculate the angle between these vectors
-		angle += acos(glm::clamp(glm::dot(v_a, v_b) / (glm::length(v_a) * glm::length(v_b)), -1.0f, 1.0f));
+	if (keys[SDL_SCANCODE_W]) camera.position += camera_forward * movement_speed * delta;
+	if (keys[SDL_SCANCODE_A]) camera.position -= camera_right   * movement_speed * delta;
+	if (keys[SDL_SCANCODE_S]) camera.position -= camera_forward * movement_speed * delta;
+	if (keys[SDL_SCANCODE_D]) camera.position += camera_right   * movement_speed * delta;
+
+	if (keys[SDL_SCANCODE_LSHIFT]) camera.position -= camera_up * movement_speed * delta;
+	if (keys[SDL_SCANCODE_SPACE])  camera.position += camera_up * movement_speed * delta;
+
+	if (keys[SDL_SCANCODE_UP])    camera.orientation = glm::angleAxis(+rotation_speed * delta, camera_right) * camera.orientation;
+	if (keys[SDL_SCANCODE_DOWN])  camera.orientation = glm::angleAxis(-rotation_speed * delta, camera_right) * camera.orientation;
+	if (keys[SDL_SCANCODE_LEFT])  camera.orientation = glm::angleAxis(+rotation_speed * delta, glm::vec3(0.0f, 1.0f, 0.0f)) * camera.orientation;
+	if (keys[SDL_SCANCODE_RIGHT]) camera.orientation = glm::angleAxis(-rotation_speed * delta, glm::vec3(0.0f, 1.0f, 0.0f)) * camera.orientation;
+
+	camera.view_projection = camera.projection * create_view_matrix(camera.position, camera.orientation);
+}
+
+void Scene::render(GLuint uni_tbo_texture, GLuint uni_view_projection) const {
+	glUniformMatrix4fv(uni_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
+
+	for (u32 i = 0; i < meshes.size(); i++) {
+		meshes[i].render(uni_tbo_texture);
+	}
+}
+
+bool Scene::intersects(const Ray& ray) const {
+	for (u32 i = 0; i < meshes.size(); i++) {
+		if (meshes[i].intersects(ray)) {
+			return true;
+		}
 	}
 
-	// If the sum of the angles is greater than 2 pi radians, then the point is inside the triangle
-	return angle >= 1.99f * PI;
+	return false;
 }
