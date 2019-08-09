@@ -3,8 +3,11 @@
 #include <SDL2/SDL.h>
 
 Scene::Scene() {
-	Mesh mesh = Mesh(AssetLoader::load_mesh(DATA_PATH("Monkey.obj")));
-	meshes.emplace_back(mesh);
+	Mesh monkey = Mesh(DATA_PATH("MonkeySubdivided1.obj"));
+	Mesh plane  = Mesh(DATA_PATH("Plane.obj"));
+
+	meshes.emplace_back(monkey);
+	meshes.emplace_back(plane);
 
 	camera = Camera();
 	camera.position    = glm::vec3(0.0f, 0.0f, 10.0f);
@@ -14,7 +17,7 @@ Scene::Scene() {
 }
 
 void Scene::init() {
-	SH_Sample samples[SAMPLE_COUNT];
+	SH_Sample* samples = new SH_Sample[SAMPLE_COUNT];
 	init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
 
 	for (u32 i = 0; i < meshes.size(); i++) {
@@ -27,6 +30,8 @@ void Scene::init() {
 	};
 
 	project_polar_function(light_function, SAMPLE_COUNT, samples, light_coeffs);
+
+	delete[] samples;
 }
 
 void Scene::update(float delta, const u8* keys) {
@@ -53,13 +58,13 @@ void Scene::update(float delta, const u8* keys) {
 	camera.view_projection = camera.projection * create_view_matrix(camera.position, camera.orientation);
 }
 
-void Scene::render(GLuint uni_tbo_texture, GLuint uni_view_projection, GLuint uni_light_coeffs) const {
+void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
 	glUniform1fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, light_coeffs);
 
 	glUniformMatrix4fv(uni_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
 
 	for (u32 i = 0; i < meshes.size(); i++) {
-		meshes[i].render(uni_tbo_texture);
+		meshes[i].render();
 	}
 }
 

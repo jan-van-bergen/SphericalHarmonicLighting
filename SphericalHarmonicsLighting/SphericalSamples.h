@@ -3,7 +3,7 @@
 
 #include "Types.h"
 
-#define SH_NUM_BANDS 5
+#define SH_NUM_BANDS 10
 #define SH_COEFFICIENT_COUNT (SH_NUM_BANDS * SH_NUM_BANDS)
 
 typedef float (*PolarFunction)(float theta, float phi);

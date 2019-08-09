@@ -34,6 +34,7 @@ struct Triangle {
 class Scene; // Forward Declaration needed by Mesh
 
 struct Mesh {
+	const char* file_name;
 	const AssetLoader::MeshData* mesh_data;
 
 	u32       triangle_count;
@@ -44,13 +45,13 @@ struct Mesh {
 	GLuint tbo;
 	GLuint tbo_tex;
 
-	Mesh(const AssetLoader::MeshData* mesh_data);
+	Mesh(const char* file_name);
 
 	void init(const Scene& scene, u32 sample_count, const SH_Sample samples[]);
 
 	bool intersects(const Ray& ray) const;
 
-	void render(GLuint uni_tbo_texture) const;
+	void render() const;
 };
 
 struct Camera {
@@ -70,7 +71,7 @@ public:
 
 	void update(float delta, const u8* keys);
 
-	void render(GLuint uni_tbo_texture, GLuint uni_view_projection, GLuint uni_light_coeffs) const;
+	void render(GLuint uni_view_projection, GLuint uni_light_coeffs) const;
 
 	bool intersects(const Ray& ray) const;
 

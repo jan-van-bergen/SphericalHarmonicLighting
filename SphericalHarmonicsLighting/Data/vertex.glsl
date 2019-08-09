@@ -6,7 +6,7 @@ layout (location = 0) in vec3 position;
 // Varyings
 layout (location = 0) out vec3 frag_colour;
 
-const int SH_COEFFICIENT_COUNT = 25;
+const int SH_COEFFICIENT_COUNT = 100;
 uniform samplerBuffer tbo_texture;
 
 uniform float light_coeffs[SH_COEFFICIENT_COUNT];
