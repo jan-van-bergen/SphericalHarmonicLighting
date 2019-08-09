@@ -126,14 +126,21 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 
 bool Mesh::intersects(const Ray& ray) const {
 	// If any Triangle intersects the Ray then the Triangle Mesh intersects the Ray as well
-	for (u32 i = 0; i < triangle_count; i++) {
-		if (triangles[i].intersects(ray)) {
-			return true;
+	bool result = false;
+
+	#pragma omp parallel for
+	for (int i = 0; i < triangle_count; i++) {
+		#pragma omp flush (result)
+		if (!result) {
+			if (triangles[i].intersects(ray)) {
+				result = true;
+				#pragma omp flush (result)
+			}
 		}
 	}
 
 	// If none of the Triangles intersect the nthe Triangle Mesh doesn't either
-	return false;
+	return result;
 }
 
 void Mesh::render() const {
