@@ -76,7 +76,10 @@ float P(int l, int m, float x) {
 
 // Renormalisation constant for SH function
 float K(int l, int m) {
-	return sqrt(((2.0f * l + 1.0f) * factorial[l - m]) / (4.0f * PI * factorial[l + m]));
+	return sqrt(
+		((2.0f * l + 1.0f) * factorial[l - m]) / 
+		(4.0f * PI * factorial[l + m])
+	);
 }
 
 // Returns a point sample of a Spherical Harmonic basis function
@@ -122,7 +125,7 @@ void init_samples(SH_Sample samples[], u32 sqrt_n_samples, u32 n_bands) {
 			// Precompute all SH coefficients for this sample
 			for (int l = 0; l < n_bands; l++) {
 				for (int m = -l; m <= l; m++) {
-					samples[index].coeffs[l * (l + 1) + m] = SH(l, m, theta, phi);
+					samples[index].coeffs[SH_INDEX(l, m)] = SH(l, m, theta, phi);
 				}
 			}
 
