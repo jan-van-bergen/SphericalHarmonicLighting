@@ -81,5 +81,7 @@ private:
 	Camera camera;
 
 	float light_coeffs[SH_COEFFICIENT_COUNT];
+
+	float angle;
 };
 

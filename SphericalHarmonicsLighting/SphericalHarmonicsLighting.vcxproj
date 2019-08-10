@@ -189,6 +189,7 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SHRotation.h" />
     <ClInclude Include="SphericalSamples.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Util.h" />
@@ -201,6 +202,7 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="SHRotation.cpp" />
     <ClCompile Include="SphericalSamples.cpp" />
     <ClCompile Include="Triangle.cpp" />
   </ItemGroup>

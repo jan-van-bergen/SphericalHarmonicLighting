@@ -2,8 +2,10 @@
 
 #include <SDL2/SDL.h>
 
+#include "SHRotation.h"
+
 Scene::Scene() {
-	Mesh monkey = Mesh(DATA_PATH("MonkeySubdivided2.obj"));
+	Mesh monkey = Mesh(DATA_PATH("SphereSubdivided1.obj"));
 	Mesh plane  = Mesh(DATA_PATH("Plane.obj"));
 
 	meshes.emplace_back(monkey);
@@ -56,10 +58,17 @@ void Scene::update(float delta, const u8* keys) {
 	if (keys[SDL_SCANCODE_RIGHT]) camera.orientation = glm::angleAxis(-rotation_speed * delta, glm::vec3(0.0f, 1.0f, 0.0f)) * camera.orientation;
 
 	camera.view_projection = camera.projection * create_view_matrix(camera.position, camera.orientation);
+
+	angle = fmod(angle + delta, 2.0f * PI);
 }
 
 void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
-	glUniform1fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, light_coeffs);
+	float light_coeffs_rotated[SH_COEFFICIENT_COUNT];
+
+	glm::quat quat = glm::angleAxis(DEG_TO_RAD(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	rotate(quat, light_coeffs, light_coeffs_rotated);
+
+	glUniform1fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, light_coeffs_rotated);
 
 	glUniformMatrix4fv(uni_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
 
