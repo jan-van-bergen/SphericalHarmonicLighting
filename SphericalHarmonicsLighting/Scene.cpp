@@ -65,7 +65,7 @@ void Scene::update(float delta, const u8* keys) {
 void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
 	float light_coeffs_rotated[SH_COEFFICIENT_COUNT];
 
-	glm::quat quat = glm::angleAxis(DEG_TO_RAD(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::quat quat = glm::angleAxis(angle, glm::vec3(0.0f, 1.0f, 0.0f));
 	rotate(quat, light_coeffs, light_coeffs_rotated);
 
 	glUniform1fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, light_coeffs_rotated);

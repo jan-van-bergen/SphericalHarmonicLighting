@@ -59,7 +59,6 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 		Ray ray;
 
 		 // Iterate over vertices
-//#pragma omp parallel for
 		for (int i = 0; i < vertex_count; i++) {
 			// Initialize SH coefficients to 0
 			for (u32 k = 0; k < SH_COEFFICIENT_COUNT; k++) {

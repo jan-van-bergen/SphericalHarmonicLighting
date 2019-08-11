@@ -55,7 +55,7 @@ private:
 	float* data;
 };
 
-inline float kronecker_delta(int i, int j) {
+inline float delta(int i, int j) {
 	return i == j ? 1.0f : 0.0f;
 }
 
@@ -76,14 +76,14 @@ inline float u(int l, int m, int n) {
 inline float v(int l, int m, int n) {
 	if (abs(n) < l) {
 		return 0.5f * sqrt(
-			(float)((1.0f + kronecker_delta(m, 0)) * (l + abs(m) - 1) * (l + abs(m))) /
+			(float)((1.0f + delta(m, 0)) * (l + abs(m) - 1) * (l + abs(m))) /
 			(float)((l + n) * (l - n))) *
-				(1.0f - 2.0f * kronecker_delta(m, 0));
+				(1.0f - 2.0f * delta(m, 0));
 	} else {
 		return 0.5f * sqrt(
-			(float)((1.0f + kronecker_delta(m, 0)) * (l + abs(m) - 1) * (l + abs(m))) /
+			(float)((1.0f + delta(m, 0)) * (l + abs(m) - 1) * (l + abs(m))) /
 			(float)((2*l) * (2*l - 1))) *
-				(1.0f - 2.0f * kronecker_delta(m, 0));
+				(1.0f - 2.0f * delta(m, 0));
 	}
 }
 
@@ -94,12 +94,12 @@ inline float w(int l, int m, int n) {
 		return -0.5f * sqrt(
 			(float)((l - abs(m) - 1) * (l - abs(m))) /
 			(float)((l + n) * (l - n))) *
-				(1.0f - kronecker_delta(m, 0));
+				(1.0f - delta(m, 0));
 	} else {
 		return -0.5f * sqrt(
 			(float)((l + abs(m) - 1) * (l + abs(m))) /
 			(float)((2*l) * (2*l - 1))) *
-				(1.0f - kronecker_delta(m, 0));
+				(1.0f - delta(m, 0));
 	}
 }
 
@@ -123,11 +123,11 @@ inline float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	if (m == 0){
 		return P(R, prev_M, l, 1, 1, n) + P(R, prev_M, l, -1, -1, n);
 	} else if (m > 0) {
-		return P(R, prev_M, l,  1,  m - 1, n) * sqrt(1.0f + kronecker_delta(m, 1)) -
-			   P(R, prev_M, l, -1, -m + 1, n) *     (1.0f - kronecker_delta(m, 1));
+		return P(R, prev_M, l,  1,  m - 1, n) * sqrt(1.0f + delta(m, 1)) -
+			   P(R, prev_M, l, -1, -m + 1, n) *     (1.0f - delta(m, 1));
 	} else if (m < 0) {
-		return P(R, prev_M, l,  1,  m + 1, n) *     (1.0f + kronecker_delta(m, -1)) -
-			   P(R, prev_M, l, -1, -m - 1, n) * sqrt(1.0f - kronecker_delta(m, -1));
+		return P(R, prev_M, l,  1,  m + 1, n) *     (1.0f + delta(m, -1)) -
+			   P(R, prev_M, l, -1, -m - 1, n) * sqrt(1.0f - delta(m, -1));
 	}
 }
 
@@ -151,13 +151,11 @@ void rotate(glm::quat& rotation, const float coeffs_in[], float coeffs_out[]) {
 	R.set( 0, -1, rotation_matrix[1][2]); R.set( 0, 0, rotation_matrix[2][2]); R.set( 0, 1, rotation_matrix[0][2]);
 	R.set( 1, -1, rotation_matrix[1][0]); R.set( 1, 0, rotation_matrix[2][0]); R.set( 1, 1, rotation_matrix[0][0]);
 
+	// First harmonic remains unchanged
 	coeffs_out[0] = coeffs_in[0];
 
-	// @Speed!
 	Matrix prev_M(0);
 	prev_M.set(0, 0, 1.0f);
-
-	int index = 1;
 
 	for (int l = 1; l < SH_NUM_BANDS; l++) {
 		Matrix M(l);
@@ -177,14 +175,12 @@ void rotate(glm::quat& rotation, const float coeffs_in[], float coeffs_out[]) {
 			float sum = 0.0f;
 
 			for (int j = 0; j < 2*l + 1; j++) {
-				sum += M(i - l, j - l) * coeffs_in[index + j];
+				sum += M(i - l, j - l) * coeffs_in[l*l + j];
 			}
 
-			coeffs_out[index + i] = sum;
+			coeffs_out[l*l + i] = sum;
 		}
 
 		prev_M = M;
-
-		index += 2*l + 1;
 	}
 }
