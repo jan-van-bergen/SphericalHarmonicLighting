@@ -2,8 +2,6 @@
 
 #include "SphericalSamples.h"
 
-#define R_INDEX(m, n) = (3*(m + 1) + n + 1)
-
 struct Matrix {
 public:
 	inline Matrix(int l) : l(l), size(2*l + 1) {
@@ -55,6 +53,7 @@ private:
 	float* data;
 };
 
+// Kronecker Delta
 inline float delta(int i, int j) {
 	return i == j ? 1.0f : 0.0f;
 }
@@ -87,8 +86,6 @@ inline float v(int l, int m, int n) {
 	}
 }
 
-// @NOTE: conflicting formulas papers "SH Ligting: the gritty details" (Green) and
-// "Rotation Matrices for Real Spherical Harmonics. Direct Determination by Recursion" (Ivanic)
 inline float w(int l, int m, int n) {
 	if (abs(n) < l) {
 		return -0.5f * sqrt(
@@ -97,7 +94,7 @@ inline float w(int l, int m, int n) {
 				(1.0f - delta(m, 0));
 	} else {
 		return -0.5f * sqrt(
-			(float)((l + abs(m) - 1) * (l + abs(m))) /
+			(float)((l - abs(m) - 1) * (l - abs(m))) /
 			(float)((2*l) * (2*l - 1))) *
 				(1.0f - delta(m, 0));
 	}
@@ -126,8 +123,10 @@ inline float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 		return P(R, prev_M, l,  1,  m - 1, n) * sqrt(1.0f + delta(m,  1)) -
 			   P(R, prev_M, l, -1, -m + 1, n) *     (1.0f - delta(m,  1));
 	} else if (m < 0) {
+		// @NOTE: Both Green's and Ivanic' papers are wrong in this case!
+		// Even in Ivanic' Errata this is still wrong
 		return P(R, prev_M, l,  1,  m + 1, n) *     (1.0f - delta(m, -1)) +
-			   P(R, prev_M, l, -1, -m - 1, n) * sqrt(1.0f - delta(m, -1));
+			   P(R, prev_M, l, -1, -m - 1, n) * sqrt(1.0f + delta(m, -1));
 	}
 }
 
@@ -141,7 +140,9 @@ inline float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	}
 }
 
-void rotate(glm::quat& rotation, const float coeffs_in[], float coeffs_out[]) {
+void rotate(const glm::quat& rotation, const float coeffs_in[], float coeffs_out[]) {
+	assert(coeffs_in != coeffs_out);
+
 	// Convert the Quaternion into Matrix form
 	glm::mat3 rotation_matrix = glm::mat3_cast(rotation);
 
