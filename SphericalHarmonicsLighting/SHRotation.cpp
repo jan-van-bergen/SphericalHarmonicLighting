@@ -110,30 +110,30 @@ inline float P(const Matrix& R, const Matrix& prev_M, int l, int i, int a, int b
 		return R(i,  1) * prev_M(a,  l - 1) -
 			   R(i, -1) * prev_M(a, -l + 1);
 	} else if (b == -l) {
-		return R(i,  1) * prev_M(a, -l + 1) -
+		return R(i,  1) * prev_M(a, -l + 1) +
 			   R(i, -1) * prev_M(a,  l - 1);
 	}
 }
 
 inline float U(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
-	return P(R, prev_M, l, 0, 0, n);
+	return P(R, prev_M, l, 0, m, n);
 }
 
 inline float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
-	if (m == 0){
+	if (m == 0) {
 		return P(R, prev_M, l, 1, 1, n) + P(R, prev_M, l, -1, -1, n);
 	} else if (m > 0) {
-		return P(R, prev_M, l,  1,  m - 1, n) * sqrt(1.0f + delta(m, 1)) -
-			   P(R, prev_M, l, -1, -m + 1, n) *     (1.0f - delta(m, 1));
+		return P(R, prev_M, l,  1,  m - 1, n) * sqrt(1.0f + delta(m,  1)) -
+			   P(R, prev_M, l, -1, -m + 1, n) *     (1.0f - delta(m,  1));
 	} else if (m < 0) {
-		return P(R, prev_M, l,  1,  m + 1, n) *     (1.0f + delta(m, -1)) -
+		return P(R, prev_M, l,  1,  m + 1, n) *     (1.0f - delta(m, -1)) +
 			   P(R, prev_M, l, -1, -m - 1, n) * sqrt(1.0f - delta(m, -1));
 	}
 }
 
 inline float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	if (m == 0) {
-		return 0.0f; // @NOTE: IS THIS REALLY CORRECT????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+		return 0.0f;
 	} else if (m > 0) {
 		return P(R, prev_M, l, 1, m + 1, n) + P(R, prev_M, l, -1, -m - 1, n);
 	} else if (m < 0) {
@@ -145,7 +145,7 @@ void rotate(glm::quat& rotation, const float coeffs_in[], float coeffs_out[]) {
 	// Convert the Quaternion into Matrix form
 	glm::mat3 rotation_matrix = glm::mat3_cast(rotation);
 
-	// Permute the Rotation Matrix
+	// Permute the Rotation Matrix and put it into a 3x3 Matrix that we can acces using indices -1, 0, 1
 	Matrix R(1);
 	R.set(-1, -1, rotation_matrix[1][1]); R.set(-1, 0, rotation_matrix[2][1]); R.set(-1, 1, rotation_matrix[0][1]);
 	R.set( 0, -1, rotation_matrix[1][2]); R.set( 0, 0, rotation_matrix[2][2]); R.set( 0, 1, rotation_matrix[0][2]);
@@ -157,9 +157,11 @@ void rotate(glm::quat& rotation, const float coeffs_in[], float coeffs_out[]) {
 	Matrix prev_M(0);
 	prev_M.set(0, 0, 1.0f);
 
+	// Iterate over bands
 	for (int l = 1; l < SH_NUM_BANDS; l++) {
 		Matrix M(l);
 
+		// Create a 2l+1 x 2l+1 Rotation Matrix to rotate the current band
 		for (int m = -l; m <= l; m++) {
 			for (int n = -l; n <= l; n++) {
 				M.set(m , n,
