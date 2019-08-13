@@ -134,7 +134,7 @@ void init_samples(SH_Sample samples[], u32 sqrt_n_samples, u32 n_bands) {
 	}
 }
 
-void project_polar_function(PolarFunction fn, u32 n_samples, const SH_Sample samples[], float result[]) {
+void project_polar_function(PolarFunction fn, u32 n_samples, const SH_Sample samples[], glm::vec3 result[]) {
 	// Weighed by the area of a 3D unit sphere
 	const float weight = 4.0f * PI;
 

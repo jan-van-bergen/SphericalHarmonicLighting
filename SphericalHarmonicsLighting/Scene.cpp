@@ -3,9 +3,10 @@
 #include <SDL2/SDL.h>
 
 #include "SHRotation.h"
+#include "HDRLightProbe.h"
 
 Scene::Scene() {
-	Mesh monkey = Mesh(DATA_PATH("MonkeySubdivided2.obj"));
+	Mesh monkey = Mesh(DATA_PATH("MonkeySubdivided1.obj"));
 	Mesh plane  = Mesh(DATA_PATH("Plane.obj"));
 
 	meshes.emplace_back(monkey);
@@ -27,8 +28,14 @@ void Scene::init() {
 	}
 
 	// Project the light function in polar coordinates to obtain the light's SH coeffs
-	auto light_function = [](float theta, float phi) {
-		return (theta < PI / 6.0f) ? 1.0f : 0.0f;
+	PolarFunction light_function = [](float theta, float phi) {
+		return (theta < PI / 6.0f) ? glm::vec3(1.0f) : glm::vec3(0.0f);
+	};
+
+	load_hdr_image(DATA_PATH("grace_probe.float"), 1000);
+
+	PolarFunction hdr_light = [](float theta, float phi) {
+		return sample_hdr_image(theta, phi);
 	};
 
 	project_polar_function(light_function, SAMPLE_COUNT, samples, light_coeffs);
@@ -63,11 +70,11 @@ void Scene::update(float delta, const u8* keys) {
 }
 
 void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
-	float light_coeffs_rotated[SH_COEFFICIENT_COUNT];
+	glm::vec3 light_coeffs_rotated[SH_COEFFICIENT_COUNT];
 
 	rotate(glm::angleAxis(angle, glm::vec3(0.0f, 1.0f, 0.0f)), light_coeffs, light_coeffs_rotated);
 
-	glUniform1fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, light_coeffs_rotated);
+	glUniform3fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, reinterpret_cast<const GLfloat*>(light_coeffs_rotated));
 
 	glUniformMatrix4fv(uni_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
 

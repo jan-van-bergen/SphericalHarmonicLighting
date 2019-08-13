@@ -27,8 +27,8 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 	const u32 vertex_count = mesh_data->vertex_count;
 	const u32 index_count  = mesh_data->index_count;
 
-	glm::vec3* positions = new glm::vec3[vertex_count];
-	float*     coeffs    = new float    [vertex_count * SH_COEFFICIENT_COUNT];
+	glm::vec3* positions       = new glm::vec3[vertex_count];
+	glm::vec3* transfer_coeffs = new glm::vec3[vertex_count * SH_COEFFICIENT_COUNT];
 
 	for (int i = 0; i < vertex_count; i++) {
 		// Copy positions
@@ -53,7 +53,7 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 			abort();
 		}
 
-		in_file.read(reinterpret_cast<char*>(coeffs), sizeof(float) * vertex_count * SH_COEFFICIENT_COUNT);
+		in_file.read(reinterpret_cast<char*>(transfer_coeffs), vertex_count * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
 		in_file.close();
 	} else {
 		Ray ray;
@@ -62,7 +62,7 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 		for (int i = 0; i < vertex_count; i++) {
 			// Initialize SH coefficients to 0
 			for (u32 k = 0; k < SH_COEFFICIENT_COUNT; k++) {
-				coeffs[i * SH_COEFFICIENT_COUNT + k] = 0.0f;
+				transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] = glm::vec3(0.0f, 0.0f, 0.0f);
 			}
 
 			// Iterate over SH samples
@@ -77,7 +77,7 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 					if (!scene.intersects(ray)) {
 						for (u32 k = 0; k < SH_COEFFICIENT_COUNT; k++) {
 							// Add the contribution of this sample
-							coeffs[i * SH_COEFFICIENT_COUNT + k] += dot * samples[j].coeffs[k];
+							transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] += material.diffuse_colour * dot * samples[j].coeffs[k];
 						}
 					}
 				}
@@ -87,7 +87,7 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 
 			// Normalize coefficients
 			for (u32 k = 0; k < SH_COEFFICIENT_COUNT; k++) {
-				coeffs[i * SH_COEFFICIENT_COUNT + k] *= normalization_factor;
+				transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] *= normalization_factor;
 			}
 
 			printf("Vertex %u out of %u done\n", i, vertex_count);
@@ -96,29 +96,29 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 		std::ofstream out_file(dat_file_name, std::ios::out | std::ios::binary | std::ios::trunc);
 		{
 			out_file.write(reinterpret_cast<const char*>(&vertex_count), sizeof(u32));
-			out_file.write(reinterpret_cast<const char*>(coeffs),        sizeof(float) * vertex_count * SH_COEFFICIENT_COUNT);
+			out_file.write(reinterpret_cast<const char*>(transfer_coeffs),        vertex_count * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
 		}
 		out_file.close();
 	}
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertex_count, positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(glm::vec3), positions, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * index_count, mesh_data->indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(u32), mesh_data->indices, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &tbo);
 	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
-	glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * vertex_count * SH_COEFFICIENT_COUNT, coeffs, GL_STATIC_DRAW);
+	glBufferData(GL_TEXTURE_BUFFER, vertex_count * SH_COEFFICIENT_COUNT * sizeof(glm::vec3), transfer_coeffs, GL_STATIC_DRAW);
 
 	glGenTextures(1, &tbo_tex);
 	glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, tbo);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, tbo);
 
 	delete[] positions;
-	delete[] coeffs;
+	delete[] transfer_coeffs;
 	
 	delete[] dat_file_name;
 }

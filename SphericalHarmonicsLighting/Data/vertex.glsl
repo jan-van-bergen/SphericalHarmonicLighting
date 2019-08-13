@@ -9,20 +9,20 @@ layout (location = 0) out vec3 frag_colour;
 const int SH_COEFFICIENT_COUNT = 25;
 uniform samplerBuffer tbo_texture;
 
-uniform float light_coeffs[SH_COEFFICIENT_COUNT];
+uniform vec3 light_coeffs[SH_COEFFICIENT_COUNT];
 
 uniform mat4 view_projection;
 
 //uniform vec3 diffuse_colour;
 
 void main() {
-	float brightness = 0.0f;
+	vec3 colour = vec3(0.0f, 0.0f, 0.0f);
 
 	for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-		brightness += light_coeffs[i] * texelFetch(tbo_texture, gl_VertexID * SH_COEFFICIENT_COUNT + i).r;
+		colour += light_coeffs[i] * texelFetch(tbo_texture, gl_VertexID * SH_COEFFICIENT_COUNT + i).rgb;
 	}
 
-	frag_colour = vec3(brightness);// * diffuse_colour;
+	frag_colour = colour;
 	
 	gl_Position = view_projection * vec4(position, 1.0f);
 }

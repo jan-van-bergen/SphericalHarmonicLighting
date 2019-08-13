@@ -31,6 +31,10 @@ struct Triangle {
 	bool intersects(const Ray& ray) const;
 };
 
+struct Material {
+	glm::vec3 diffuse_colour = glm::vec3(1.0f, 1.0f, 1.0f);
+};
+
 class Scene; // Forward Declaration needed by Mesh
 
 struct Mesh {
@@ -44,6 +48,8 @@ struct Mesh {
 	GLuint ibo;
 	GLuint tbo;
 	GLuint tbo_tex;
+
+	Material material;
 
 	Mesh(const char* file_name);
 
@@ -80,7 +86,7 @@ private:
 
 	Camera camera;
 
-	float light_coeffs[SH_COEFFICIENT_COUNT];
+	glm::vec3 light_coeffs[SH_COEFFICIENT_COUNT];
 
 	float angle;
 };

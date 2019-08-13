@@ -8,7 +8,7 @@
 
 #define SH_INDEX(l, m) (l * (l+1) + m)
 
-typedef float (*PolarFunction)(float theta, float phi);
+typedef glm::vec3 (*PolarFunction)(float theta, float phi);
 
 // Spherical Harmonics Sample
 struct SH_Sample {
@@ -21,4 +21,4 @@ struct SH_Sample {
 
 void init_samples(SH_Sample samples[], u32 sqrt_n_samples, u32 n_bands);
 
-void project_polar_function(PolarFunction fn, u32 n_samples, const SH_Sample samples[], float result[]);
+void project_polar_function(PolarFunction fn, u32 n_samples, const SH_Sample samples[], glm::vec3 result[]);

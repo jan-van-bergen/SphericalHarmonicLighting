@@ -140,7 +140,7 @@ inline float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	}
 }
 
-void rotate(const glm::quat& rotation, const float coeffs_in[], float coeffs_out[]) {
+void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 coeffs_out[]) {
 	assert(coeffs_in != coeffs_out);
 
 	// Convert the Quaternion into Matrix form
@@ -175,7 +175,7 @@ void rotate(const glm::quat& rotation, const float coeffs_in[], float coeffs_out
 
 		// Matrix multiply
 		for (int i = 0; i < 2*l + 1; i++) {
-			float sum = 0.0f;
+			glm::vec3 sum(0.0f, 0.0f, 0.0f);
 
 			for (int j = 0; j < 2*l + 1; j++) {
 				sum += M(i - l, j - l) * coeffs_in[l*l + j];
