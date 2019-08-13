@@ -3,7 +3,6 @@
 #include <SDL2/SDL.h>
 
 #include "SHRotation.h"
-#include "HDRLightProbe.h"
 
 Scene::Scene() {
 	Mesh monkey = Mesh(DATA_PATH("MonkeySubdivided1.obj"));
@@ -11,6 +10,9 @@ Scene::Scene() {
 
 	meshes.emplace_back(monkey);
 	meshes.emplace_back(plane);
+
+	lights.emplace_back(new DirectionalLight());
+	//lights.emplace_back(new HDRProbeLight(DATA_PATH("grace_probe.float"), 1000));
 
 	camera = Camera();
 	camera.position    = glm::vec3(0.0f, 0.0f, 10.0f);
@@ -27,18 +29,9 @@ void Scene::init() {
 		meshes[i].init(*this, SAMPLE_COUNT, samples);
 	}
 
-	// Project the light function in polar coordinates to obtain the light's SH coeffs
-	PolarFunction light_function = [](float theta, float phi) {
-		return (theta < PI / 6.0f) ? glm::vec3(1.0f) : glm::vec3(0.0f);
-	};
-
-	load_hdr_image(DATA_PATH("grace_probe.float"), 1000);
-
-	PolarFunction hdr_light = [](float theta, float phi) {
-		return sample_hdr_image(theta, phi);
-	};
-
-	project_polar_function(light_function, SAMPLE_COUNT, samples, light_coeffs);
+	for (u32 i = 0; i < lights.size(); i++) {
+		lights[i]->init(SAMPLE_COUNT, samples);
+	}
 
 	delete[] samples;
 }
@@ -72,7 +65,7 @@ void Scene::update(float delta, const u8* keys) {
 void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
 	glm::vec3 light_coeffs_rotated[SH_COEFFICIENT_COUNT];
 
-	rotate(glm::angleAxis(angle, glm::vec3(0.0f, 1.0f, 0.0f)), light_coeffs, light_coeffs_rotated);
+	rotate(glm::angleAxis(angle, glm::vec3(0.0f, 1.0f, 0.0f)), lights[0]->coefficients, light_coeffs_rotated);
 
 	glUniform3fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, reinterpret_cast<const GLfloat*>(light_coeffs_rotated));
 

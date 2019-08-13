@@ -11,6 +11,8 @@
 #include "Ray.h"
 #include "SphericalSamples.h"
 
+#include "Light.h"
+
 #include "Types.h"
 #include "Util.h"
 
@@ -82,11 +84,10 @@ public:
 	bool intersects(const Ray& ray) const;
 
 private:
-	Array<Mesh> meshes;
+	Array<Mesh>   meshes;
+	Array<Light*> lights;
 
 	Camera camera;
-
-	glm::vec3 light_coeffs[SH_COEFFICIENT_COUNT];
 
 	float angle;
 };

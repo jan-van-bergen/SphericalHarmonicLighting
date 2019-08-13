@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Light">
+      <UniqueIdentifier>{5084613c-08f6-4d9e-8ec6-03a657ecba3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -48,7 +51,7 @@
     <ClInclude Include="SHRotation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HDRLightProbe.h">
+    <ClInclude Include="Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -80,8 +83,11 @@
     <ClCompile Include="SHRotation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HDRLightProbe.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DirectionalLight.cpp">
+      <Filter>Source Files\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="HDRProbeLight.cpp">
+      <Filter>Source Files\Light</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

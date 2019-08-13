@@ -18,7 +18,6 @@ bool Triangle::intersects(const Ray& ray) const {
 	// Check if the intersection point is inside the triangle
 	float angle = 0.0f;
 
-	// @SPEED: unroll loop
 	for (u32 i = 0; i < 3; i++)
 	{
 		// Calculate the vector from this vertex to the intersection point
