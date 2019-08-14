@@ -28,7 +28,7 @@ KD_Node::~KD_Node() {
 
 bool KD_Node::intersects(const Ray& ray) const {
 	if (ray.intersects(aabb)) {
-		if (left && (left->triangle_count > 0 || right->triangle_count > 0)) {
+		if (left) { // If the left node pointer is non-null, we are not in a leaf node and need to recurse
 			if (left->intersects(ray)) {
 				return true; // We can immediately return true here, no need to check the right node as well
 			} else {
@@ -46,8 +46,8 @@ bool KD_Node::intersects(const Ray& ray) const {
 	return false;
 }
 
-KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) {
-	KD_Node* node = new KD_Node();
+KD_Node * KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) {
+	KD_Node * node = new KD_Node();
 	node->triangle_count = triangle_count;
 
 	// @TODO: should check this in caller?
@@ -56,25 +56,28 @@ KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) 
 	if (triangle_count == 1) {
 		node->aabb = triangles[0]->calc_aabb();
 
-		node->triangles      = new Triangle const *[1];
-		node->triangles[0]   = triangles[0];
+		node->triangles    = new Triangle const *[1];
+		node->triangles[0] = triangles[0];
 
 		return node;
 	}
 
-	bool terminate = triangle_count <= TERMINATION_SIZE;
-
 	node->triangle_count = triangle_count;
 
-	if (terminate) {
+	// Check termination condition
+	if (triangle_count <= TERMINATION_SIZE) {
 		node->triangles = new Triangle const *[triangle_count];
 		memcpy(node->triangles, triangles, triangle_count * sizeof(Triangle *));
+
+		return node;
 	}
 
 	glm::vec3  center(0.0f, 0.0f, 0.0f);
-	glm::vec3* triangle_centers = new glm::vec3[triangle_count];
+	// @PERFORMANCE: should be calculated only once and passed as an argument,
+	// instead of recalulcating at every depth level in the tree
+	glm::vec3* triangle_centers = new glm::vec3[triangle_count]; 
 
-	float inv_triangle_count = 1.0f / (float)triangle_count;
+	const float inv_triangle_count = 1.0f / (float)triangle_count;
 	
 	for (int i = 0; i < triangle_count; i++) {
 		node->aabb.expand(triangles[i]->calc_aabb());
@@ -100,6 +103,8 @@ KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) 
 	}
 
 	// @TODO: can we only reserve (triangle_count >> 1) + 1 here?
+	// @SPEED: could perhaps be collapsed into 1 single buffer, where LEFT list is
+	// allocated left to right and RIGHT list is allocated right to left?
 	Triangle const ** triangles_left  = new Triangle const *[triangle_count];
 	Triangle const ** triangles_right = new Triangle const *[triangle_count];
 
@@ -138,6 +143,7 @@ KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) 
 		} break;
 	}
 
+	// Sanity check
 	assert(triangle_count_left + triangle_count_right == triangle_count);
 	
 	delete[] triangle_centers;
