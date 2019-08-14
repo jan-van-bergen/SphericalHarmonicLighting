@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#define TERMINATION_SIZE 4
+
 bool KD_Node::intersects(const Ray& ray) const {
 	if (ray.intersects(aabb)) {
 		if (left && (left->triangle_count > 0 || right->triangle_count > 0)) {
@@ -24,11 +26,6 @@ bool KD_Node::intersects(const Ray& ray) const {
 
 KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) {
 	KD_Node* node = new KD_Node();
-	node->aabb.min = glm::vec3(0.0f, 0.0f, 0.0f);
-	node->aabb.max = glm::vec3(0.0f, 0.0f, 0.0f);
-	node->left  = NULL;
-	node->right = NULL;
-	node->triangles = NULL;
 
 	// @TODO: should check this in caller?
 	if (triangle_count == 0) return node;
@@ -36,7 +33,8 @@ KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) 
 	if (triangle_count == 1) {
 		node->aabb = triangles[0]->calc_aabb();
 
-		node->triangles = new Triangle const *[1];
+		node->triangle_count = 1;
+		node->triangles      = new Triangle const *[1];
 		node->triangles[0] = triangles[0];
 
 		return node;
@@ -113,34 +111,29 @@ KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) 
 	
 	delete[] triangle_centers;
 
+	bool terminate = triangle_count <= TERMINATION_SIZE;
+
 	if (triangle_count_left == 0 && triangle_count_right > 0) {
 		triangle_count_left = triangle_count_right;
 		triangles_left      = triangles_right;
+
+		terminate = true;
 	} 
-	else if (triangle_count_right == 0 && triangle_count_left  > 0) { 
+	if (triangle_count_right == 0 && triangle_count_left > 0) { 
 		triangle_count_right = triangle_count_left;
 		triangles_right      = triangles_left;
+
+		terminate = true;
 	}
 
-	// @WTF
-	u32 matches = 0;
-	for (u32 i = 0; i < triangle_count_left; i++) {
-		for (u32 j = 0; j < triangle_count_right; j++) {
-			if (triangles_left[i] == triangles_right[j]) {
-				matches++;
-			}
-		}
-	}
+	node->triangle_count = triangle_count;
 
-	if (matches <= triangle_count_left >> 1 && matches <= triangle_count_right >> 1) {
-		node->left  = build(triangle_count_left,  triangles_left);
-		node->right = build(triangle_count_right, triangles_right);
-	} else {
-		node->left  = new KD_Node();
-		node->right = new KD_Node();
-
+	if (terminate) {
 		node->triangles = new Triangle const *[triangle_count];
 		memcpy(node->triangles, triangles, triangle_count * sizeof(Triangle*));
+	} else {
+		node->left  = build(triangle_count_left,  triangles_left);
+		node->right = build(triangle_count_right, triangles_right);
 	}
 
 	if (triangles_left != triangles_right) {
