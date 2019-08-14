@@ -21,6 +21,10 @@ Scene::Scene() {
 	//camera.projection  = glm::perspectiveFov(RAD_TO_DEG(110.0f), 1600.0f, 900.0f, 0.1f, 100.0f); // @HARDCODED
 }
 
+Scene::~Scene() {
+	delete kd_tree;
+}
+
 void Scene::init() {
 	SH_Sample* samples = new SH_Sample[SAMPLE_COUNT];
 	init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);

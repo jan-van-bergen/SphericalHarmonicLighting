@@ -13,16 +13,8 @@ public:
 	u32               triangle_count;
 	Triangle const ** triangles;
 
-	inline KD_Node() {
-		aabb.min = glm::vec3(0.0f, 0.0f, 0.0f);
-		aabb.max = glm::vec3(0.0f, 0.0f, 0.0f);
-
-		left  = NULL;
-		right = NULL;
-
-		triangle_count = 0;
-		triangles      = NULL;
-	}
+	KD_Node();
+	~KD_Node();
 
 	bool intersects(const Ray& ray) const;
 

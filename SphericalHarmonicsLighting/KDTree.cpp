@@ -4,6 +4,28 @@
 
 #define TERMINATION_SIZE 4
 
+KD_Node::KD_Node() {
+	aabb.min = glm::vec3(0.0f, 0.0f, 0.0f);
+	aabb.max = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	left  = NULL;
+	right = NULL;
+
+	triangle_count = 0;
+	triangles      = NULL;
+}
+
+KD_Node::~KD_Node() {
+	if (left) {
+		delete left;
+		delete right;
+	}
+
+	if (triangles) {
+		delete[] triangles;
+	}
+}
+
 bool KD_Node::intersects(const Ray& ray) const {
 	if (ray.intersects(aabb)) {
 		if (left && (left->triangle_count > 0 || right->triangle_count > 0)) {
