@@ -5,7 +5,7 @@
 #include "SHRotation.h"
 
 Scene::Scene() {
-	Mesh monkey = Mesh(DATA_PATH("MonkeySubdivided1.obj"));
+	Mesh monkey = Mesh(DATA_PATH("MonkeySubdivided2.obj"));
 	Mesh plane  = Mesh(DATA_PATH("Plane.obj"));
 
 	meshes.emplace_back(monkey);
