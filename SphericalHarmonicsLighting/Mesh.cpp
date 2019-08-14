@@ -79,6 +79,9 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 							// Add the contribution of this sample
 							transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] += material.diffuse_colour * dot * samples[j].coeffs[k];
 						}
+					} else {
+						Triangle* triangle = closest_triangle(ray);
+						TRAP;
 					}
 				}
 			}
@@ -131,7 +134,7 @@ bool Mesh::intersects(const Ray& ray) const {
 	for (int i = 0; i < triangle_count; i++) {
 		#pragma omp flush (result)
 		if (!result) {
-			if (triangles[i].intersects(ray)) {
+			if (Ray::triangle_intersect(ray, triangles[i])) {
 				result = true;
 				#pragma omp flush (result)
 			}
@@ -140,6 +143,22 @@ bool Mesh::intersects(const Ray& ray) const {
 
 	// If none of the Triangles intersect the nthe Triangle Mesh doesn't either
 	return result;
+}
+
+Triangle* Mesh::closest_triangle(const Ray& ray) const {
+	float     min_distance = INFINITY;
+	Triangle* closest_triangle = NULL;
+
+	for (int i = 0; i < triangle_count; i++) {
+		float distance = Ray::triangle_distance(ray, triangles[i]);
+		if (distance < min_distance) {
+			min_distance = distance;
+			
+			closest_triangle = triangles + i;
+		}
+	}
+
+	return closest_triangle;
 }
 
 void Mesh::render() const {
