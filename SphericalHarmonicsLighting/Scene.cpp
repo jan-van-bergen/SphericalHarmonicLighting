@@ -25,6 +25,26 @@ void Scene::init() {
 	SH_Sample* samples = new SH_Sample[SAMPLE_COUNT];
 	init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
 
+	u32 total_triangle_count = 0;
+	for (u32 i = 0; i < meshes.size(); i++) {
+		total_triangle_count += meshes[i].triangle_count;
+	}
+
+	Triangle const ** total_triangles = new Triangle const *[total_triangle_count];
+
+	u32 offset = 0;
+	for (u32 i = 0; i < meshes.size(); i++) {
+		for (u32 j = 0; j < meshes[i].triangle_count; j++) {
+			total_triangles[offset + j] = meshes[i].triangles + j;
+		}
+
+		offset += meshes[i].triangle_count;
+	}
+
+	kd_tree = KD_Node::build(total_triangle_count, total_triangles);
+
+	delete[] total_triangles;
+
 	for (u32 i = 0; i < meshes.size(); i++) {
 		meshes[i].init(*this, SAMPLE_COUNT, samples);
 	}
@@ -77,11 +97,5 @@ void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
 }
 
 bool Scene::intersects(const Ray& ray) const {
-	for (u32 i = 0; i < meshes.size(); i++) {
-		if (meshes[i].intersects(ray)) {
-			return true;
-		}
-	}
-
-	return false;
+	return kd_tree->intersects(ray);
 }

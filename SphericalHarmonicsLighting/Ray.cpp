@@ -1,5 +1,7 @@
 #include "Ray.h"
 
+#include <algorithm>
+
 #include "VectorMath.h"
 
 #include "Types.h"
@@ -19,20 +21,20 @@ AABB Triangle::calc_aabb() const {
 	return aabb;
 }
 
-bool Ray::triangle_intersect(const Ray& ray, const Triangle& triangle) {
-	float dot = glm::dot(ray.direction, triangle.plane.normal);
+bool Ray::intersects(const Triangle& triangle) const {
+	float dot = glm::dot(direction, triangle.plane.normal);
 
 	// If the plane's normal is orthogonal to the Ray's direction there can be no intersection
 	if (abs(dot) < 0.001f) return false;
 
 	// Get the ray parameter where it meets the plane
-	float t = -(glm::dot(ray.origin, triangle.plane.normal) + triangle.plane.distance) / dot;
+	float t = -(glm::dot(origin, triangle.plane.normal) + triangle.plane.distance) / dot;
 
 	// If t is negative the intersection takes place behind the Ray
 	if (t <= 0.0f) return false;
 
 	// Calculate the point of intersection between the Ray and Plane
-	glm::vec3 intersection_point = ray.origin + t * ray.direction;
+	glm::vec3 intersection_point = origin + t * direction;
 
 	// Check if the intersection point is inside the triangle
 	float angle = 0.0f;
@@ -51,20 +53,20 @@ bool Ray::triangle_intersect(const Ray& ray, const Triangle& triangle) {
 	return angle >= 1.99f * PI;
 }
 
-float Ray::triangle_distance(const Ray& ray, const Triangle& triangle) {
-	float dot = glm::dot(ray.direction, triangle.plane.normal);
+float Ray::distance(const Triangle& triangle) const {
+	float dot = glm::dot(direction, triangle.plane.normal);
 
 	// If the plane's normal is orthogonal to the Ray's direction there can be no intersection
 	if (abs(dot) < 0.001f) return false;
 
 	// Get the ray parameter where it meets the plane
-	float t = -(glm::dot(ray.origin, triangle.plane.normal) + triangle.plane.distance) / dot;
+	float t = -(glm::dot(origin, triangle.plane.normal) + triangle.plane.distance) / dot;
 
 	// If t is negative the intersection takes place behind the Ray
 	if (t <= 0.0f) return false;
 
 	// Calculate the point of intersection between the Ray and Plane
-	glm::vec3 intersection_point = ray.origin + t * ray.direction;
+	glm::vec3 intersection_point = origin + t * direction;
 
 	// Check if the intersection point is inside the triangle
 	float angle = 0.0f;
@@ -87,15 +89,15 @@ float Ray::triangle_distance(const Ray& ray, const Triangle& triangle) {
 	}
 }
 
-bool Ray::aabb_intersect(const Ray& ray, const AABB& aabb) {
-	glm::vec3 inv_direction(1.0f / ray.direction.x, 1.0f / ray.direction.y, 1.0f / ray.direction.z);
+bool Ray::intersects(const AABB& aabb) const {
+	glm::vec3 inv_direction(1.0f / direction.x, 1.0f / direction.y, 1.0f / direction.z);
 
-    float t1 = (aabb.min.x - ray.origin.x) * inv_direction.x;
-    float t2 = (aabb.max.x - ray.origin.x) * inv_direction.x;
-    float t3 = (aabb.min.y - ray.origin.y) * inv_direction.y;
-    float t4 = (aabb.max.y - ray.origin.y) * inv_direction.y;
-    float t5 = (aabb.min.z - ray.origin.z) * inv_direction.z;
-    float t6 = (aabb.max.z - ray.origin.z) * inv_direction.z;
+    float t1 = (aabb.min.x - origin.x) * inv_direction.x;
+    float t2 = (aabb.max.x - origin.x) * inv_direction.x;
+    float t3 = (aabb.min.y - origin.y) * inv_direction.y;
+    float t4 = (aabb.max.y - origin.y) * inv_direction.y;
+    float t5 = (aabb.min.z - origin.z) * inv_direction.z;
+    float t6 = (aabb.max.z - origin.z) * inv_direction.z;
 
     float t_min = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
     float t_max = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));

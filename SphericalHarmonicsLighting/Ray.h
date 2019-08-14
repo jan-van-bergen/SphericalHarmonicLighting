@@ -25,8 +25,8 @@ struct Ray {
 	glm::vec3 origin;
 	glm::vec3 direction;
 
-	static bool  triangle_intersect(const Ray& ray, const Triangle& triangle);
-	static float triangle_distance (const Ray& ray, const Triangle& triangle);
+	bool  intersects(const Triangle& triangle) const;
+	float distance  (const Triangle& triangle) const;
 
-	static bool aabb_intersect(const Ray& ray, const AABB& aabb);
+	bool intersects(const AABB& aabb) const;
 };

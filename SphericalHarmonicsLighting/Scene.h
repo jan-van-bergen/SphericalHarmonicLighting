@@ -9,6 +9,7 @@
 #include "AssetLoader.h"
 
 #include "Ray.h"
+#include "KDTree.h"
 #include "SphericalSamples.h"
 
 #include "Light.h"
@@ -32,15 +33,15 @@ private:
 	const char* file_name;
 	const AssetLoader::MeshData* mesh_data;
 	
-	u32       triangle_count;
-	Triangle* triangles;
-
 	GLuint vbo;
 	GLuint ibo;
 	GLuint tbo;
 	GLuint tbo_tex;
 
 public:
+	u32       triangle_count;
+	Triangle* triangles;
+
 	Material material;
 
 	Mesh(const char* file_name);
@@ -77,6 +78,8 @@ public:
 private:
 	Array<Mesh>   meshes;
 	Array<Light*> lights;
+
+	KD_Node* kd_tree;
 
 	Camera camera;
 
