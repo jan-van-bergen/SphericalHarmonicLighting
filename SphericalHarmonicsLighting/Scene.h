@@ -80,7 +80,7 @@ private:
 	Array<Mesh>   meshes;
 	Array<Light*> lights;
 
-	KD_Node* kd_tree;
+	KD_Node * kd_tree;
 
 	Camera camera;
 

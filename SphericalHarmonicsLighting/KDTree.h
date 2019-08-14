@@ -7,8 +7,8 @@ class KD_Node {
 public:
 	AABB aabb;
 	
-	KD_Node* left;
-	KD_Node* right;
+	KD_Node * left;
+	KD_Node * right;
 
 	u32               triangle_count;
 	Triangle const ** triangles;

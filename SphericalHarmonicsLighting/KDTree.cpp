@@ -5,8 +5,8 @@
 #define TERMINATION_SIZE 4
 
 KD_Node::KD_Node() {
-	aabb.min = glm::vec3(0.0f, 0.0f, 0.0f);
-	aabb.max = glm::vec3(0.0f, 0.0f, 0.0f);
+	aabb.min = glm::vec3(+INFINITY);
+	aabb.max = glm::vec3(-INFINITY);
 
 	left  = NULL;
 	right = NULL;
@@ -48,6 +48,7 @@ bool KD_Node::intersects(const Ray& ray) const {
 
 KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) {
 	KD_Node* node = new KD_Node();
+	node->triangle_count = triangle_count;
 
 	// @TODO: should check this in caller?
 	if (triangle_count == 0) return node;
@@ -55,11 +56,19 @@ KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) 
 	if (triangle_count == 1) {
 		node->aabb = triangles[0]->calc_aabb();
 
-		node->triangle_count = 1;
 		node->triangles      = new Triangle const *[1];
-		node->triangles[0] = triangles[0];
+		node->triangles[0]   = triangles[0];
 
 		return node;
+	}
+
+	bool terminate = triangle_count <= TERMINATION_SIZE;
+
+	node->triangle_count = triangle_count;
+
+	if (terminate) {
+		node->triangles = new Triangle const *[triangle_count];
+		memcpy(node->triangles, triangles, triangle_count * sizeof(Triangle *));
 	}
 
 	glm::vec3  center(0.0f, 0.0f, 0.0f);
@@ -132,38 +141,13 @@ KD_Node* KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) 
 	assert(triangle_count_left + triangle_count_right == triangle_count);
 	
 	delete[] triangle_centers;
-
-	bool terminate = triangle_count <= TERMINATION_SIZE;
-
-	if (triangle_count_left == 0 && triangle_count_right > 0) {
-		triangle_count_left = triangle_count_right;
-		triangles_left      = triangles_right;
-
-		terminate = true;
-	} 
-	if (triangle_count_right == 0 && triangle_count_left > 0) { 
-		triangle_count_right = triangle_count_left;
-		triangles_right      = triangles_left;
-
-		terminate = true;
-	}
-
-	node->triangle_count = triangle_count;
-
-	if (terminate) {
-		node->triangles = new Triangle const *[triangle_count];
-		memcpy(node->triangles, triangles, triangle_count * sizeof(Triangle*));
-	} else {
-		node->left  = build(triangle_count_left,  triangles_left);
-		node->right = build(triangle_count_right, triangles_right);
-	}
-
-	if (triangles_left != triangles_right) {
-		delete[] triangles_left;
-		delete[] triangles_right;
-	} else {
-		delete[] triangles_left;
-	}
+	
+	// Recurse
+	node->left  = build(triangle_count_left,  triangles_left);
+	node->right = build(triangle_count_right, triangles_right);
+	
+	delete[] triangles_left;
+	delete[] triangles_right;
 
 	return node;
 }

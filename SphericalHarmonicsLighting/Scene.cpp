@@ -29,6 +29,8 @@ void Scene::init() {
 	SH_Sample* samples = new SH_Sample[SAMPLE_COUNT];
 	init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
 
+	printf("Starting KD Tree construction...\n");
+
 	u32 total_triangle_count = 0;
 	for (u32 i = 0; i < meshes.size(); i++) {
 		total_triangle_count += meshes[i].triangle_count;
@@ -46,6 +48,8 @@ void Scene::init() {
 	}
 
 	kd_tree = KD_Node::build(total_triangle_count, total_triangles);
+	
+	printf("KD Tree construction done!\n");
 
 	delete[] total_triangles;
 
