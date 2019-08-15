@@ -1,6 +1,7 @@
 #include "Scene.h"
 
 #include <fstream>
+#include "ScopedTimer.h"
 
 Mesh::Mesh(const char* file_name) : file_name(file_name), mesh_data(AssetLoader::load_mesh(file_name)) {
 	assert(mesh_data->index_count % 3 == 0);
@@ -57,9 +58,12 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 		in_file.close();
 	} else {
 		Ray ray;
+		
+		ScopedTimer timer("Mesh");
 
 		 // Iterate over vertices
 		for (int i = 0; i < vertex_count; i++) {
+
 			// Initialize SH coefficients to 0
 			for (u32 k = 0; k < SH_COEFFICIENT_COUNT; k++) {
 				transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -90,7 +94,7 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 				transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] *= normalization_factor;
 			}
 
-			printf("Vertex %u out of %u done\n", i, vertex_count);
+			//printf("Vertex %u out of %u done\n", i, vertex_count);
 		}
 
 		std::ofstream out_file(dat_file_name, std::ios::out | std::ios::binary | std::ios::trunc);

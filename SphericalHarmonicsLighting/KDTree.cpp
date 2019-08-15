@@ -1,7 +1,5 @@
 #include "KDTree.h"
 
-#include <cassert>
-
 #define TERMINATION_SIZE 4
 
 KD_Node::KD_Node() {

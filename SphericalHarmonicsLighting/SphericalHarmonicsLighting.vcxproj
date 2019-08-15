@@ -187,12 +187,12 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
     <ClInclude Include="Display.h" />
     <ClInclude Include="KDTree.h" />
     <ClInclude Include="Light.h" />
-    <ClInclude Include="pch.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SHRotation.h" />
     <ClInclude Include="SphericalSamples.h" />
+    <ClInclude Include="ScopedTimer.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="VectorMath.h" />
