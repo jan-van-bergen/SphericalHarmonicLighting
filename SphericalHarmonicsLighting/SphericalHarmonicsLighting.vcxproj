@@ -101,12 +101,7 @@
       <AdditionalLibraryDirectories>./lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>if $(PlatformShortName) == x86 (
-xcopy /E /Y "$(ProjectDir)bin\x86" "$(OutputPath)"
-)
-if $(PlatformShortName) == x64 (
-xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
-)</Command>
+      <Command>xcopy /E /Y "$(ProjectDir)dll\x86" "$(OutputPath)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -128,12 +123,7 @@ xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
       <AdditionalLibraryDirectories>./lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>if $(PlatformShortName) == x86 (
-xcopy /E /Y "$(ProjectDir)bin\x86" "$(OutputPath)"
-)
-if $(PlatformShortName) == x64 (
-xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
-)</Command>
+      <Command>xcopy /E /Y "$(ProjectDir)dll\x64" "$(OutputPath)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -159,12 +149,7 @@ xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
       <AdditionalLibraryDirectories>./lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>if $(PlatformShortName) == x86 (
-xcopy /E /Y "$(ProjectDir)bin\x86" "$(OutputPath)"
-)
-if $(PlatformShortName) == x64 (
-xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
-)</Command>
+      <Command>xcopy /E /Y "$(ProjectDir)dll\x86" "$(OutputPath)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -190,12 +175,7 @@ xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
       <AdditionalLibraryDirectories>./lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>if $(PlatformShortName) == x86 (
-xcopy /E /Y "$(ProjectDir)bin\x86" "$(OutputPath)"
-)
-if $(PlatformShortName) == x64 (
-xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
-)</Command>
+      <Command>xcopy /E /Y "$(ProjectDir)dll\x64" "$(OutputPath)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

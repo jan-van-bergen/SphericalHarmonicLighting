@@ -1,6 +1,8 @@
 #pragma once
 #include <map>
 
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 #include <assimp/Importer.hpp> 
 
 #include "AssetLoader.h"
@@ -23,11 +25,9 @@ namespace AssetLoader {
 			const aiVector3D& nor = mesh->mNormals[i];
 			const aiVector3D& tex = mesh->mTextureCoords[0][i];
 
-			mesh_data->vertices[i] = Vertex(
-				glm::vec3(pos.x, pos.y, pos.z),
-				glm::vec2(tex.x, tex.y),
-				glm::vec3(nor.x, nor.y, nor.z)
-			);
+			mesh_data->vertices[i].position  = glm::vec3(pos.x, pos.y, pos.z);
+			mesh_data->vertices[i].tex_coord = glm::vec2(tex.x, tex.y);
+			mesh_data->vertices[i].normal    = glm::vec3(nor.x, nor.y, nor.z);
 		}
 
 		for (u32 i = 0; i < mesh->mNumFaces; i++) {
