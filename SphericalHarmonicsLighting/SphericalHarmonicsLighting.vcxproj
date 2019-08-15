@@ -98,11 +98,15 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glew32.lib;glew32s.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;SOIL.lib;OpenGL32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>./lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>./lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>cd $(ProjectDir)bin
-xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
+      <Command>if $(PlatformShortName) == x86 (
+xcopy /E /Y "$(ProjectDir)bin\x86" "$(OutputPath)"
+)
+if $(PlatformShortName) == x64 (
+xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -121,11 +125,15 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glew32.lib;glew32s.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;SOIL.lib;OpenGL32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>./lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>./lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>cd $(ProjectDir)bin
-xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
+      <Command>if $(PlatformShortName) == x86 (
+xcopy /E /Y "$(ProjectDir)bin\x86" "$(OutputPath)"
+)
+if $(PlatformShortName) == x64 (
+xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -148,11 +156,15 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glew32.lib;glew32s.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;SOIL.lib;OpenGL32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>./lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>./lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>cd $(ProjectDir)bin
-xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
+      <Command>if $(PlatformShortName) == x86 (
+xcopy /E /Y "$(ProjectDir)bin\x86" "$(OutputPath)"
+)
+if $(PlatformShortName) == x64 (
+xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -175,11 +187,15 @@ xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glew32.lib;glew32s.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;SOIL.lib;OpenGL32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>./lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>./lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>cd $(ProjectDir)bin
-xcopy /E /Y "$(ProjectDir)bin" "$(SolutionDir)$(ConfigurationName)"</Command>
+      <Command>if $(PlatformShortName) == x86 (
+xcopy /E /Y "$(ProjectDir)bin\x86" "$(OutputPath)"
+)
+if $(PlatformShortName) == x64 (
+xcopy /E /Y "$(ProjectDir)bin\x64" "$(OutputPath)"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
