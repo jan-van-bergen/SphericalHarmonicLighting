@@ -198,6 +198,7 @@
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="HDRProbeLight.cpp" />
+    <ClCompile Include="KDNodeDebugger.cpp" />
     <ClCompile Include="KDTree.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
