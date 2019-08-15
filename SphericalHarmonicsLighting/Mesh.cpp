@@ -3,6 +3,9 @@
 #include <fstream>
 #include "ScopedTimer.h"
 
+// Forces NVIDIA driver to be used 
+extern "C" { _declspec(dllexport) unsigned NvOptimusEnablement = 0x00000001; }
+
 Mesh::Mesh(const char* file_name) : file_name(file_name), mesh_data(AssetLoader::load_mesh(file_name)) {
 	assert(mesh_data->index_count % 3 == 0);
 
