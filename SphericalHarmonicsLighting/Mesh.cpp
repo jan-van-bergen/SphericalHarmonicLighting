@@ -100,7 +100,7 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 		std::ofstream out_file(dat_file_name, std::ios::out | std::ios::binary | std::ios::trunc);
 		{
 			out_file.write(reinterpret_cast<const char*>(&vertex_count), sizeof(u32));
-			out_file.write(reinterpret_cast<const char*>(transfer_coeffs),        vertex_count * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
+			out_file.write(reinterpret_cast<const char*>(transfer_coeffs), vertex_count * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
 		}
 		out_file.close();
 	}

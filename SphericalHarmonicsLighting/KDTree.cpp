@@ -1,6 +1,6 @@
 #include "KDTree.h"
 
-#define TERMINATION_SIZE 4
+#define TERMINATION_SIZE 2
 
 KD_Node::KD_Node() {
 	aabb.min = glm::vec3(+INFINITY);
