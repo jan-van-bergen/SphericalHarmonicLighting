@@ -48,7 +48,7 @@ void KD_Node_Debugger::init(const KD_Node * root) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(u32), indices.data(), GL_STATIC_DRAW);
 
-	line_count = indices.size();
+	index_count = indices.size();
 
 	positions.clear();
 	indices.clear();
@@ -61,7 +61,7 @@ void KD_Node_Debugger::draw() const {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glDrawElements(GL_LINES, line_count, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_LINES, index_count, GL_UNSIGNED_INT, NULL);
 
 	glDisableVertexAttribArray(0);
 }
