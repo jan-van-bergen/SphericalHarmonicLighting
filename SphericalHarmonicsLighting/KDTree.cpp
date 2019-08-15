@@ -27,12 +27,13 @@ KD_Node::~KD_Node() {
 bool KD_Node::intersects(const Ray& ray) const {
 	if (ray.intersects(aabb)) {
 		if (left) { // If the left node pointer is non-null, we are not in a leaf node and need to recurse
-			if (left->intersects(ray)) {
-				return true; // We can immediately return true here, no need to check the right node as well
-			} else {
-				return right->intersects(ray);
-			}	
+			assert(triangles == NULL);
+
+			return left->intersects(ray) || right->intersects(ray);
 		} else { // The current node is a leaf
+			assert(left  == NULL);
+			assert(right == NULL);
+
 			for (u32 i = 0; i < triangle_count; i++) {
 				if (ray.intersects(*triangles[i])) {
 					return true;
@@ -59,8 +60,6 @@ KD_Node * KD_Node::build(u32 triangle_count, Triangle const * const triangles[])
 
 		return node;
 	}
-
-	node->triangle_count = triangle_count;
 
 	// Check termination condition
 	if (triangle_count <= TERMINATION_SIZE) {
