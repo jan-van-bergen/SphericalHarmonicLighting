@@ -74,13 +74,16 @@ public:
 
 	void render(GLuint uni_view_projection, GLuint uni_light_coeffs) const;
 
+	void debug(GLuint uni_debug_view_projection) const;
+
 	bool intersects(const Ray& ray) const;
 
 private:
+	KD_Node * kd_tree;
+	KD_Node_Debugger kd_tree_debugger;
+
 	Array<Mesh>   meshes;
 	Array<Light*> lights;
-
-	KD_Node * kd_tree;
 
 	Camera camera;
 

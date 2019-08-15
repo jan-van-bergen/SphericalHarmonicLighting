@@ -55,6 +55,8 @@ void Scene::init() {
 		delete[] total_triangles;
 	}
 
+	kd_tree_debugger.init(kd_tree);
+
 	for (u32 i = 0; i < meshes.size(); i++) {
 		meshes[i].init(*this, SAMPLE_COUNT, samples);
 	}
@@ -104,6 +106,12 @@ void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
 	for (u32 i = 0; i < meshes.size(); i++) {
 		meshes[i].render();
 	}
+}
+
+void Scene::debug(GLuint uni_debug_view_projection) const {
+	glUniformMatrix4fv(uni_debug_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
+
+	kd_tree_debugger.draw();
 }
 
 bool Scene::intersects(const Ray& ray) const {
