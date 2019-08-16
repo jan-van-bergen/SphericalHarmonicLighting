@@ -12,7 +12,7 @@ public:
 	KD_Node * left;
 	KD_Node * right;
 
-	u32               triangle_count;
+	int               triangle_count;
 	Triangle const ** triangles;
 
 	KD_Node();
@@ -20,7 +20,7 @@ public:
 
 	bool intersects(const Ray& ray) const;
 
-	static KD_Node* build(u32 triangle_count, Triangle const * const triangles[]);
+	static KD_Node* build(int triangle_count, Triangle const * const triangles[]);
 };
 
 struct KD_Node_Debugger {

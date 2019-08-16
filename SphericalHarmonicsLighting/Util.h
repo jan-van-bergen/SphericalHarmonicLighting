@@ -11,4 +11,4 @@
 #define DEG_TO_RAD(angle) ((angle) * PI / 180.0f)
 #define RAD_TO_DEG(angle) ((angle) / PI * 180.0f)
 
-#define TRAP _asm { int 3 }
+#define TRAP __debugbreak()

@@ -34,7 +34,7 @@ bool KD_Node::intersects(const Ray& ray) const {
 			assert(left  == NULL);
 			assert(right == NULL);
 
-			for (u32 i = 0; i < triangle_count; i++) {
+			for (int i = 0; i < triangle_count; i++) {
 				if (ray.intersects(*triangles[i])) {
 					return true;
 				}
@@ -45,7 +45,7 @@ bool KD_Node::intersects(const Ray& ray) const {
 	return false;
 }
 
-KD_Node * KD_Node::build(u32 triangle_count, Triangle const * const triangles[]) {
+KD_Node * KD_Node::build(int triangle_count, Triangle const * const triangles[]) {
 	KD_Node * node = new KD_Node();
 	node->triangle_count = triangle_count;
 
@@ -105,13 +105,13 @@ KD_Node * KD_Node::build(u32 triangle_count, Triangle const * const triangles[])
 	Triangle const ** triangles_left  = new Triangle const *[triangle_count];
 	Triangle const ** triangles_right = new Triangle const *[triangle_count];
 
-	u32 triangle_count_left  = 0;
-	u32 triangle_count_right = 0;
+	int triangle_count_left  = 0;
+	int triangle_count_right = 0;
 
 	// Split along the longest axis
 	switch (longest_axis) {
 		case X_AXIS: {
-			for (u32 i = 0; i < triangle_count; i++) {
+			for (int i = 0; i < triangle_count; i++) {
 				if (triangle_centers[i].x < center.x) {
 					triangles_left[triangle_count_left++]   = triangles[i];
 				} else {
@@ -121,7 +121,7 @@ KD_Node * KD_Node::build(u32 triangle_count, Triangle const * const triangles[])
 		} break;
 		
 		case Y_AXIS: {
-			for (u32 i = 0; i < triangle_count; i++) {
+			for (int i = 0; i < triangle_count; i++) {
 				if (triangle_centers[i].y < center.y) {
 					triangles_left[triangle_count_left++]   = triangles[i];
 				} else {
@@ -131,7 +131,7 @@ KD_Node * KD_Node::build(u32 triangle_count, Triangle const * const triangles[])
 		} break;
 
 		case Z_AXIS: {
-			for (u32 i = 0; i < triangle_count; i++) {
+			for (int i = 0; i < triangle_count; i++) {
 				if (triangle_centers[i].z < center.z) {
 					triangles_left[triangle_count_left++]   = triangles[i];
 				} else {

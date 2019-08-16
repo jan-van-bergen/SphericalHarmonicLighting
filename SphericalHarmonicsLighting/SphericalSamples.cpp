@@ -98,16 +98,16 @@ float SH(int l, int m, float theta, float phi) {
 } 
 
 // Fills an N*N*2 array with uniformly distributed SH samples across the unit sphere, using jittered stratification
-void init_samples(SH_Sample samples[], u32 sqrt_n_samples, u32 n_bands) {
+void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands) {
 	const float inv_sqrt_n_samples = 1.0f / sqrt_n_samples;
 
 	std::random_device random_device;
 	std::mt19937 gen(random_device());
 	std::uniform_real_distribution<float> U01(0.0f, 1.0f);
 
-	u32 index = 0;
-	for (u32 i = 0; i < sqrt_n_samples; i++) {
-		for (u32 j = 0; j < sqrt_n_samples; j++) {
+	int index = 0;
+	for (int i = 0; i < sqrt_n_samples; i++) {
+		for (int j = 0; j < sqrt_n_samples; j++) {
 			// Generate unbiased distribution of spherical coords
 			float x = ((float)i + U01(gen)) * inv_sqrt_n_samples;
 			float y = ((float)j + U01(gen)) * inv_sqrt_n_samples;
@@ -134,24 +134,24 @@ void init_samples(SH_Sample samples[], u32 sqrt_n_samples, u32 n_bands) {
 	}
 }
 
-void project_polar_function(PolarFunction fn, u32 n_samples, const SH_Sample samples[], glm::vec3 result[]) {
+void project_polar_function(PolarFunction fn, int n_samples, const SH_Sample samples[], glm::vec3 result[]) {
 	// Weighed by the area of a 3D unit sphere
 	const float weight = 4.0f * PI;
 
 	// For each sample
-	for (u32 i = 0; i < n_samples; i++) {
+	for (int i = 0; i < n_samples; i++) {
 		float theta = samples[i].theta;
 		float phi   = samples[i].phi;
 
 		// For each SH coefficient
-		for (u32 n = 0; n < SH_COEFFICIENT_COUNT; n++) {
+		for (int n = 0; n < SH_COEFFICIENT_COUNT; n++) {
 			result[n] += fn(theta, phi) * samples[i].coeffs[n];
 		}
 	}
 
 	// Divide the result by weight and number of samples
 	const float factor = weight / n_samples;
-	for (u32 i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+	for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 		result[i] *= factor;
 	}
 } 

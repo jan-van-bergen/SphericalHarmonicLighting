@@ -9,7 +9,7 @@ Mesh::Mesh(const char* file_name) : file_name(file_name), mesh_data(AssetLoader:
 	triangle_count = mesh_data->index_count / 3;
 	triangles      = new Triangle[triangle_count];
 
-	for (u32 i = 0; i < triangle_count; i++) {
+	for (int i = 0; i < triangle_count; i++) {
 		// Set the three Vertex positions of the Triangle
 		triangles[i].vertices[0] = mesh_data->vertices[mesh_data->indices[3*i    ]].position;
 		triangles[i].vertices[1] = mesh_data->vertices[mesh_data->indices[3*i + 1]].position;
@@ -24,9 +24,9 @@ Mesh::Mesh(const char* file_name) : file_name(file_name), mesh_data(AssetLoader:
 	}
 }
 
-void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[]) {
-	const u32 vertex_count = mesh_data->vertex_count;
-	const u32 index_count  = mesh_data->index_count;
+void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[]) {
+	const int vertex_count = mesh_data->vertex_count;
+	const int index_count  = mesh_data->index_count;
 
 	glm::vec3* positions       = new glm::vec3[vertex_count];
 	glm::vec3* transfer_coeffs = new glm::vec3[vertex_count * SH_COEFFICIENT_COUNT];
@@ -65,12 +65,12 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 		for (int i = 0; i < vertex_count; i++) {
 
 			// Initialize SH coefficients to 0
-			for (u32 k = 0; k < SH_COEFFICIENT_COUNT; k++) {
+			for (int k = 0; k < SH_COEFFICIENT_COUNT; k++) {
 				transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] = glm::vec3(0.0f, 0.0f, 0.0f);
 			}
 
 			// Iterate over SH samples
-			for (u32 j = 0; j < sample_count; j++) {
+			for (int j = 0; j < sample_count; j++) {
 				float dot = glm::dot(mesh_data->vertices[i].normal, samples[j].direction);
 
 				// Only accept samples within the hemisphere defined by the Vertex normal
@@ -79,7 +79,7 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 					ray.direction = samples[j].direction;
 
 					if (!scene.intersects(ray)) {
-						for (u32 k = 0; k < SH_COEFFICIENT_COUNT; k++) {
+						for (int k = 0; k < SH_COEFFICIENT_COUNT; k++) {
 							// Add the contribution of this sample
 							transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] += material.diffuse_colour * dot * samples[j].coeffs[k];
 						}
@@ -90,7 +90,7 @@ void Mesh::init(const Scene& scene, u32 sample_count, const SH_Sample samples[])
 			const float normalization_factor = 4.0f * PI / sample_count;
 
 			// Normalize coefficients
-			for (u32 k = 0; k < SH_COEFFICIENT_COUNT; k++) {
+			for (int k = 0; k < SH_COEFFICIENT_COUNT; k++) {
 				transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] *= normalization_factor;
 			}
 

@@ -19,6 +19,6 @@ struct SH_Sample {
 	float coeffs[SH_COEFFICIENT_COUNT];
 };
 
-void init_samples(SH_Sample samples[], u32 sqrt_n_samples, u32 n_bands);
+void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands);
 
-void project_polar_function(PolarFunction fn, u32 n_samples, const SH_Sample samples[], glm::vec3 result[]);
+void project_polar_function(PolarFunction fn, int n_samples, const SH_Sample samples[], glm::vec3 result[]);

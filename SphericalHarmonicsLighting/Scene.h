@@ -19,7 +19,7 @@
 
 #include "VectorMath.h"
 
-#define SQRT_SAMPLE_COUNT 50u
+#define SQRT_SAMPLE_COUNT 50
 #define SAMPLE_COUNT      (SQRT_SAMPLE_COUNT * SQRT_SAMPLE_COUNT)
 
 struct Material {
@@ -39,14 +39,14 @@ private:
 	GLuint tbo_tex;
 
 public:
-	u32       triangle_count;
+	int       triangle_count;
 	Triangle* triangles;
 
 	Material material;
 
 	Mesh(const char* file_name);
 
-	void init(const Scene& scene, u32 sample_count, const SH_Sample samples[]);
+	void init(const Scene& scene, int sample_count, const SH_Sample samples[]);
 	
 	bool      intersects      (const Ray& ray) const;
 	Triangle* closest_triangle(const Ray& ray) const;
