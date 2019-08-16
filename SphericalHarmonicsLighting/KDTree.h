@@ -30,7 +30,7 @@ private:
 
 	GLuint vbo;
 	GLuint ibo;
-	u32 line_count;
+	u32 index_count;
 
 	void init_tree(const KD_Node * kd_node);
 
