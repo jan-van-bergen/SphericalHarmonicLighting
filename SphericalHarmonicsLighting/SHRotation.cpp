@@ -2,6 +2,8 @@
 
 #include "SphericalSamples.h"
 
+// Square Matrix of size 2l + 1 for a given l
+// Can be indexed using indices in the range [-l, l]
 struct Matrix {
 public:
 	inline Matrix(int l) : l(l), size(2*l + 1) {
@@ -27,12 +29,11 @@ public:
 	inline float operator()(int row, int col) const {
 		row += l;
 		col += l;
+		
+		assert(row >= 0 && row < size);
+		assert(col >= 0 && col < size);
 
-		if (row >= 0 && row < size && col >= 0 && col < size) {
-			return data[row * size + col];
-		}
-
-		return 0.0f;
+		return data[row * size + col];
 	}
 
 	inline void operator=(Matrix& other) {
@@ -54,11 +55,11 @@ private:
 };
 
 // Kronecker Delta
-inline float delta(int i, int j) {
+float delta(int i, int j) {
 	return i == j ? 1.0f : 0.0f;
 }
 
-inline float u(int l, int m, int n) {
+float u(int l, int m, int n) {
 	if (abs(n) < l) {
 		return sqrt(
 			(float)((l + m) * (l - m)) /
@@ -72,7 +73,7 @@ inline float u(int l, int m, int n) {
 	}
 }
 
-inline float v(int l, int m, int n) {
+float v(int l, int m, int n) {
 	if (abs(n) < l) {
 		return 0.5f * sqrt(
 			(float)((1.0f + delta(m, 0)) * (l + abs(m) - 1) * (l + abs(m))) /
@@ -86,7 +87,7 @@ inline float v(int l, int m, int n) {
 	}
 }
 
-inline float w(int l, int m, int n) {
+float w(int l, int m, int n) {
 	if (abs(n) < l) {
 		return -0.5f * sqrt(
 			(float)((l - abs(m) - 1) * (l - abs(m))) /
@@ -100,7 +101,7 @@ inline float w(int l, int m, int n) {
 	}
 }
 
-inline float P(const Matrix& R, const Matrix& prev_M, int l, int i, int a, int b) {
+float P(const Matrix& R, const Matrix& prev_M, int l, int i, int a, int b) {
 	if (abs(b) < l) {
 		return R(i,  0) * prev_M(a, b);
 	} else if (b == l) {
@@ -112,11 +113,11 @@ inline float P(const Matrix& R, const Matrix& prev_M, int l, int i, int a, int b
 	}
 }
 
-inline float U(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
+float U(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	return P(R, prev_M, l, 0, m, n);
 }
 
-inline float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
+float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	if (m == 0) {
 		return P(R, prev_M, l, 1, 1, n) + P(R, prev_M, l, -1, -1, n);
 	} else if (m > 0) {
@@ -130,7 +131,7 @@ inline float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	}
 }
 
-inline float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
+float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	if (m == 0) {
 		return 0.0f;
 	} else if (m > 0) {
@@ -141,6 +142,7 @@ inline float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 }
 
 void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 coeffs_out[]) {
+	// Make sure the input and ouput arrays are not the same memory location
 	assert(coeffs_in != coeffs_out);
 
 	// Convert the Quaternion into Matrix form
@@ -155,6 +157,7 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 	// First harmonic remains unchanged
 	coeffs_out[0] = coeffs_in[0];
 
+	// Initialize previous matrix as a 1x1 matrix containing 1
 	Matrix prev_M(0);
 	prev_M.set(0, 0, 1.0f);
 
@@ -165,11 +168,19 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 		// Create a 2l+1 x 2l+1 Rotation Matrix to rotate the current band
 		for (int m = -l; m <= l; m++) {
 			for (int n = -l; n <= l; n++) {
-				M.set(m , n,
-					u(l, m, n) * U(R, prev_M, l, m, n) +
-					v(l, m, n) * V(R, prev_M, l, m, n) +
-					w(l, m, n) * W(R, prev_M, l, m, n)
-				);
+				float u_ = u(l, m, n);
+				float v_ = v(l, m, n);
+				float w_ = w(l, m, n);
+
+				float M_mn = 0.0f;
+				// Only calulcate U,V,W if u,v,w are non-zero
+				// Not only is this an optimization, U,V,W will index out of
+				// bounds when they are called for any l,m,n that cause u,v,w to be 0
+				if (u_) M_mn += u_ * U(R, prev_M, l, m, n);
+				if (v_) M_mn += v_ * V(R, prev_M, l, m, n);
+				if (w_) M_mn += w_ * W(R, prev_M, l, m, n);
+
+				M.set(m , n, M_mn);
 			}
 		}
 
@@ -184,6 +195,7 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 			coeffs_out[l*l + i] = sum;
 		}
 
+		// Matrix M becomes previous matrix in the next iteration
 		prev_M = M;
 	}
 }
