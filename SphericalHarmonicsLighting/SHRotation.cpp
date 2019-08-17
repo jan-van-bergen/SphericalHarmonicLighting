@@ -6,14 +6,9 @@
 // Can be indexed using indices in the range [-l, l]
 struct Matrix {
 public:
-	inline Matrix(int l) : l(l), size(2*l + 1) {
-		data = new float[size * size];
-	}
-
-	inline ~Matrix() {
-		if (data) {
-			delete[] data;
-		}
+	void set_order(int l) {
+		this->l    = l;
+		this->size = 2*l + 1;
 	}
 
 	inline void set(int row, int col, float value) {
@@ -36,22 +31,10 @@ public:
 		return data[row * size + col];
 	}
 
-	inline void operator=(Matrix& other) {
-		l    = other.l;
-		size = other.size;
-
-		if (data) {
-			delete[] data;
-		}
-
-		data = other.data;
-		other.data = NULL;
-	}
-
 private:
 	int l;
 	int size;
-	float* data;
+	float data[4 * SH_NUM_BANDS*SH_NUM_BANDS + 4*SH_NUM_BANDS + 1];
 };
 
 // Kronecker Delta
@@ -132,11 +115,11 @@ float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 }
 
 float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
-	if (m == 0) {
-		return 0.0f;
-	} else if (m > 0) {
+	assert(m != 0);
+
+	if (m > 0) {
 		return P(R, prev_M, l, 1, m + 1, n) + P(R, prev_M, l, -1, -m - 1, n);
-	} else if (m < 0) {
+	} else {
 		return P(R, prev_M, l, 1, m - 1, n) - P(R, prev_M, l, -1, -m + 1, n);
 	}
 }
@@ -149,7 +132,8 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 	glm::mat3 rotation_matrix = glm::mat3_cast(rotation);
 
 	// Permute the Rotation Matrix and put it into a 3x3 Matrix that we can acces using indices -1, 0, 1
-	Matrix R(1);
+	Matrix R;
+	R.set_order(1);
 	R.set(-1, -1, rotation_matrix[1][1]); R.set(-1, 0, rotation_matrix[2][1]); R.set(-1, 1, rotation_matrix[0][1]);
 	R.set( 0, -1, rotation_matrix[1][2]); R.set( 0, 0, rotation_matrix[2][2]); R.set( 0, 1, rotation_matrix[0][2]);
 	R.set( 1, -1, rotation_matrix[1][0]); R.set( 1, 0, rotation_matrix[2][0]); R.set( 1, 1, rotation_matrix[0][0]);
@@ -157,13 +141,15 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 	// First harmonic remains unchanged
 	coeffs_out[0] = coeffs_in[0];
 
-	// Initialize previous matrix as a 1x1 matrix containing 1
-	Matrix prev_M(0);
-	prev_M.set(0, 0, 1.0f);
+	Matrix matrices[SH_NUM_BANDS];
+	
+	// Initialize first matrix as a 1x1 matrix containing 1
+	matrices[0].set_order(0);
+	matrices[0].set(0, 0, 1.0f);
 
 	// Iterate over bands
 	for (int l = 1; l < SH_NUM_BANDS; l++) {
-		Matrix M(l);
+		matrices[l].set_order(l);
 
 		// Create a 2l+1 x 2l+1 Rotation Matrix to rotate the current band
 		for (int m = -l; m <= l; m++) {
@@ -176,11 +162,11 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 				// Only calulcate U,V,W if u,v,w are non-zero
 				// Not only is this an optimization, U,V,W will index out of
 				// bounds when they are called for any l,m,n that cause u,v,w to be 0
-				if (u_) M_mn += u_ * U(R, prev_M, l, m, n);
-				if (v_) M_mn += v_ * V(R, prev_M, l, m, n);
-				if (w_) M_mn += w_ * W(R, prev_M, l, m, n);
+				if (u_) M_mn += u_ * U(R, matrices[l - 1], l, m, n);
+				if (v_) M_mn += v_ * V(R, matrices[l - 1], l, m, n);
+				if (w_) M_mn += w_ * W(R, matrices[l - 1], l, m, n);
 
-				M.set(m , n, M_mn);
+				matrices[l].set(m , n, M_mn);
 			}
 		}
 
@@ -189,13 +175,10 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 			glm::vec3 sum(0.0f, 0.0f, 0.0f);
 
 			for (int j = 0; j < 2*l + 1; j++) {
-				sum += M(i - l, j - l) * coeffs_in[l*l + j];
+				sum += matrices[l](i - l, j - l) * coeffs_in[l*l + j];
 			}
 
 			coeffs_out[l*l + i] = sum;
 		}
-
-		// Matrix M becomes previous matrix in the next iteration
-		prev_M = M;
 	}
 }
