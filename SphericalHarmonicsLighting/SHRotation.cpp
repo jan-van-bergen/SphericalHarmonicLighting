@@ -141,15 +141,19 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 	// First harmonic remains unchanged
 	coeffs_out[0] = coeffs_in[0];
 
-	Matrix matrices[SH_NUM_BANDS];
+	Matrix matrices[2];
 	
 	// Initialize first matrix as a 1x1 matrix containing 1
 	matrices[0].set_order(0);
 	matrices[0].set(0, 0, 1.0f);
 
+	int current_index  = 1;
+	int previous_index = 0;
+
 	// Iterate over bands
 	for (int l = 1; l < SH_NUM_BANDS; l++) {
-		matrices[l].set_order(l);
+		current_index = l & 1; // Modulo 2 by performing a bitwise AND with 1
+		matrices[current_index].set_order(l);
 
 		// Create a 2l+1 x 2l+1 Rotation Matrix to rotate the current band
 		for (int m = -l; m <= l; m++) {
@@ -162,11 +166,11 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 				// Only calulcate U,V,W if u,v,w are non-zero
 				// Not only is this an optimization, U,V,W will index out of
 				// bounds when they are called for any l,m,n that cause u,v,w to be 0
-				if (u_) M_mn += u_ * U(R, matrices[l - 1], l, m, n);
-				if (v_) M_mn += v_ * V(R, matrices[l - 1], l, m, n);
-				if (w_) M_mn += w_ * W(R, matrices[l - 1], l, m, n);
+				if (u_) M_mn += u_ * U(R, matrices[previous_index], l, m, n);
+				if (v_) M_mn += v_ * V(R, matrices[previous_index], l, m, n);
+				if (w_) M_mn += w_ * W(R, matrices[previous_index], l, m, n);
 
-				matrices[l].set(m , n, M_mn);
+				matrices[current_index].set(m , n, M_mn);
 			}
 		}
 
@@ -175,10 +179,12 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 			glm::vec3 sum(0.0f, 0.0f, 0.0f);
 
 			for (int j = 0; j < 2*l + 1; j++) {
-				sum += matrices[l](i - l, j - l) * coeffs_in[l*l + j];
+				sum += matrices[current_index](i - l, j - l) * coeffs_in[l*l + j];
 			}
 
 			coeffs_out[l*l + i] = sum;
 		}
+
+		previous_index = current_index;
 	}
 }
