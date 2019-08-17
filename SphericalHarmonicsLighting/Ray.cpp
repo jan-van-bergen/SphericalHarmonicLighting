@@ -39,7 +39,7 @@ bool Ray::intersects(const Triangle& triangle) const {
 	// Check if the intersection point is inside the triangle
 	float angle = 0.0f;
 
-	for (u32 i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		// Calculate the vector from this vertex to the intersection point
 		const glm::vec3 v_a = triangle.vertices[i        ] - intersection_point;
@@ -71,7 +71,7 @@ float Ray::distance(const Triangle& triangle) const {
 	// Check if the intersection point is inside the triangle
 	float angle = 0.0f;
 
-	for (u32 i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		// Calculate the vector from this vertex to the intersection point
 		const glm::vec3 v_a = triangle.vertices[i        ] - intersection_point;

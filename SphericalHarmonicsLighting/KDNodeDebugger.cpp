@@ -12,7 +12,7 @@ void KD_Node_Debugger::init_tree(const KD_Node * kd_node) {
 	positions.push_back(glm::vec3(kd_node->aabb.max.x, kd_node->aabb.max.y, kd_node->aabb.max.z));
 	positions.push_back(glm::vec3(kd_node->aabb.min.x, kd_node->aabb.max.y, kd_node->aabb.max.z));
 	
-	u32 index_start = indices.size();
+	int index_start = indices.size();
 
 	// Bottom of AABB
 	indices.push_back(index_start + 0); indices.push_back(index_start + 1); 

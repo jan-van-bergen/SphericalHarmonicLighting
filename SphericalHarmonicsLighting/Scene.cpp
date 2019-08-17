@@ -34,16 +34,16 @@ void Scene::init() {
 	{
 		ScopedTimer timer("KD Tree Construction");
 
-		u32 total_triangle_count = 0;
-		for (u32 i = 0; i < meshes.size(); i++) {
+		int total_triangle_count = 0;
+		for (int i = 0; i < meshes.size(); i++) {
 			total_triangle_count += meshes[i].triangle_count;
 		}
 
 		Triangle const ** total_triangles = new Triangle const *[total_triangle_count];
 
-		u32 offset = 0;
-		for (u32 i = 0; i < meshes.size(); i++) {
-			for (u32 j = 0; j < meshes[i].triangle_count; j++) {
+		int offset = 0;
+		for (int i = 0; i < meshes.size(); i++) {
+			for (int j = 0; j < meshes[i].triangle_count; j++) {
 				total_triangles[offset + j] = meshes[i].triangles + j;
 			}
 
@@ -57,11 +57,11 @@ void Scene::init() {
 
 	kd_tree_debugger.init(kd_tree);
 
-	for (u32 i = 0; i < meshes.size(); i++) {
+	for (int i = 0; i < meshes.size(); i++) {
 		meshes[i].init(*this, SAMPLE_COUNT, samples);
 	}
 
-	for (u32 i = 0; i < lights.size(); i++) {
+	for (int i = 0; i < lights.size(); i++) {
 		lights[i]->init(SAMPLE_COUNT, samples);
 	}
 
@@ -103,7 +103,7 @@ void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
 
 	glUniformMatrix4fv(uni_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
 
-	for (u32 i = 0; i < meshes.size(); i++) {
+	for (int i = 0; i < meshes.size(); i++) {
 		meshes[i].render();
 	}
 }
