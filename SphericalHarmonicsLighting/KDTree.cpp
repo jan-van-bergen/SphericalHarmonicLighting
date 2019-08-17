@@ -99,23 +99,23 @@ KD_Node * KD_Node::build(int triangle_count, Triangle const * const triangles[])
 		longest_axis = Z_AXIS;
 	}
 
-	// @TODO: can we only reserve (triangle_count >> 1) + 1 here?
-	// @SPEED: could perhaps be collapsed into 1 single buffer, where LEFT list is
-	// allocated left to right and RIGHT list is allocated right to left?
-	Triangle const ** triangles_left  = new Triangle const *[triangle_count];
-	Triangle const ** triangles_right = new Triangle const *[triangle_count];
+	// Allocate a new buffer for the Triangle pointers to be copied into
+	// The buffer grows left to right, containing the Triangles left of the average
+	// The buffer grows right to left, containing the Triangles right of the average
+	Triangle const ** triangle_buffer = new Triangle const *[triangle_count];
 
-	int triangle_count_left  = 0;
-	int triangle_count_right = 0;
+	// Indices indicating where the two buffers growing towards eachother currently are
+	int triangle_index_left  = 0;
+	int triangle_index_right = triangle_count - 1;
 
 	// Split along the longest axis
 	switch (longest_axis) {
 		case X_AXIS: {
 			for (int i = 0; i < triangle_count; i++) {
 				if (triangle_centers[i].x < center.x) {
-					triangles_left[triangle_count_left++]   = triangles[i];
+					triangle_buffer[triangle_index_left++]  = triangles[i];
 				} else {
-					triangles_right[triangle_count_right++] = triangles[i];
+					triangle_buffer[triangle_index_right--] = triangles[i];
 				}
 			}
 		} break;
@@ -123,9 +123,9 @@ KD_Node * KD_Node::build(int triangle_count, Triangle const * const triangles[])
 		case Y_AXIS: {
 			for (int i = 0; i < triangle_count; i++) {
 				if (triangle_centers[i].y < center.y) {
-					triangles_left[triangle_count_left++]   = triangles[i];
+					triangle_buffer[triangle_index_left++]  = triangles[i];
 				} else {
-					triangles_right[triangle_count_right++] = triangles[i];
+					triangle_buffer[triangle_index_right--] = triangles[i];
 				}
 			}
 		} break;
@@ -133,25 +133,24 @@ KD_Node * KD_Node::build(int triangle_count, Triangle const * const triangles[])
 		case Z_AXIS: {
 			for (int i = 0; i < triangle_count; i++) {
 				if (triangle_centers[i].z < center.z) {
-					triangles_left[triangle_count_left++]   = triangles[i];
+					triangle_buffer[triangle_index_left++]  = triangles[i];
 				} else {
-					triangles_right[triangle_count_right++] = triangles[i];
+					triangle_buffer[triangle_index_right--] = triangles[i];
 				}
 			}
 		} break;
 	}
 
-	// Sanity check
-	assert(triangle_count_left + triangle_count_right == triangle_count);
+	// Sanity check, at the end the left and right buffers should meet exactly
+	assert(triangle_index_left == triangle_index_right + 1);
 	
 	delete[] triangle_centers;
 	
 	// Recurse
-	node->left  = build(triangle_count_left,  triangles_left);
-	node->right = build(triangle_count_right, triangles_right);
+	node->left  = build(triangle_index_left,                  triangle_buffer);
+	node->right = build(triangle_count - triangle_index_left, triangle_buffer + triangle_index_left);
 	
-	delete[] triangles_left;
-	delete[] triangles_right;
+	delete[] triangle_buffer;
 
 	return node;
 }
