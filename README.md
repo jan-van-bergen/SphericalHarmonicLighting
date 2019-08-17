@@ -3,7 +3,7 @@
 An experimental project to explore global illumination techniques that use Spherical Harmonics.
 
 ### Features
-* Incoming radiance is calulcated per vertex. The transfer function takes into account the surface normal for direct diffuse lighting. It also takes into account indirect shadowing. This is achieved by performing a raytracing precalculation step.
+* Radiance is calulcated per vertex. The transfer function takes into account the surface normal for direct diffuse lighting. It also takes into account indirect shadowing. This is achieved by performing a raytracing precalculation step.
 * Raytracing is accelerated using a KD Tree.
 * Spherical Harmonic coefficients can be efficiently rotated using recurrence relations as described in a paper by Ivanic.
 * Lighting is performed on the GPU. The Spherical Harmonic coefficients are stored in a Texture Buffer Object.
