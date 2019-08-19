@@ -17,6 +17,6 @@ public:
 		auto stop_time = std::chrono::high_resolution_clock::now();
 		u128 duration  = std::chrono::duration_cast<std::chrono::microseconds>(stop_time - start_time).count();
 
-		printf("%s took: %u us\n", name, duration);
+		printf("%s took: %llu us\n", name, duration);
 	}
 };

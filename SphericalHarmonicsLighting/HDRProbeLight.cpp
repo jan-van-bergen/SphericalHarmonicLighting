@@ -4,7 +4,7 @@
 
 #include "Util.h"
 
-HDRProbeLight::HDRProbeLight(const char* filename, u32 size) : size(size), data(new glm::vec3[size * size]) {
+HDRProbeLight::HDRProbeLight(const char* filename, int size) : size(size), data(new glm::vec3[size * size]) {
 	std::ifstream file(filename, std::ios::in | std::ios::binary); 
 	if (!file.is_open()) {
 		abort();
@@ -22,8 +22,8 @@ glm::vec3 HDRProbeLight::get_light(float theta, float phi) const {
 	const float u = direction.x * r;
 	const float v = direction.y * r;
 
-	const u32 x = (u * 0.5f + 0.5f) * (float)size;
-	const u32 y = (v * 0.5f + 0.5f) * (float)size;
+	const int x = (u * 0.5f + 0.5f) * size;
+	const int y = (v * 0.5f + 0.5f) * size;
 
 	assert(data);
 	return data[x * size + y];

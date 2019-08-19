@@ -42,11 +42,11 @@ public:
 
 class HDRProbeLight : public Light {
 private:
-	u32        size;
+	int        size;
 	glm::vec3* data;
 
 public:
-	HDRProbeLight(const char* filename, u32 size);
+	HDRProbeLight(const char* filename, int size);
 
 	glm::vec3 get_light(float theta, float phi) const;
 };
