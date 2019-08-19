@@ -2,11 +2,9 @@
 
 #include "SphericalSamples.h"
 
-#include "ScopedTimer.h"
-
 /*
 	Rotation matrix recurrence relation based on the 1996 paper 
-	“Rotation Matrices for Real Spherical Harmonics”
+	"Rotation Matrices for Real Spherical Harmonics"
 	by Ivanic et al (with errata factored in!)
 */
 
@@ -160,8 +158,6 @@ void init_sh_rotation() {
 void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 coeffs_out[]) {
 	// Make sure the input and ouput arrays are not the same memory location
 	assert(coeffs_in != coeffs_out);
-
-	ScopedTimer timer("Rotation");
 
 	// Convert the Quaternion into Matrix form
 	glm::mat3 rotation_matrix = glm::mat3_cast(rotation);
