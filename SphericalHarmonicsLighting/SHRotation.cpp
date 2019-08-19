@@ -12,7 +12,7 @@
 // Can be indexed using indices in the range [-l, l]
 struct Matrix {
 public:
-	void set_order(int l) {
+	inline void set_order(int l) {
 		this->l    = l;
 		this->size = 2*l + 1;
 	}
@@ -44,9 +44,7 @@ private:
 };
 
 // Kronecker Delta
-float delta(int i, int j) {
-	return i == j ? 1.0f : 0.0f;
-}
+#define DELTA(i, j) (i==j ? 1.0f : 0.0f)
 
 // Formula for the size of the precalulated arrays for u,v,w
 // Derivd by expanding the summation: \sum_{l=0}^{b-1} (2l+1) (2l+1)
@@ -74,14 +72,14 @@ float u(int l, int m, int n) {
 float v(int l, int m, int n) {
 	if (abs(n) < l) {
 		return 0.5f * sqrt(
-			(float)((1.0f + delta(m, 0)) * (l + abs(m) - 1) * (l + abs(m))) /
+			(float)((1.0f + DELTA(m, 0)) * (l + abs(m) - 1) * (l + abs(m))) /
 			(float)((l + n) * (l - n))) *
-				(1.0f - 2.0f * delta(m, 0));
+				(1.0f - 2.0f * DELTA(m, 0));
 	} else {
 		return 0.5f * sqrt(
-			(float)((1.0f + delta(m, 0)) * (l + abs(m) - 1) * (l + abs(m))) /
+			(float)((1.0f + DELTA(m, 0)) * (l + abs(m) - 1) * (l + abs(m))) /
 			(float)((2*l) * (2*l - 1))) *
-				(1.0f - 2.0f * delta(m, 0));
+				(1.0f - 2.0f * DELTA(m, 0));
 	}
 }
 
@@ -90,12 +88,12 @@ float w(int l, int m, int n) {
 		return -0.5f * sqrt(
 			(float)((l - abs(m) - 1) * (l - abs(m))) /
 			(float)((l + n) * (l - n))) *
-				(1.0f - delta(m, 0));
+				(1.0f - DELTA(m, 0));
 	} else {
 		return -0.5f * sqrt(
 			(float)((l - abs(m) - 1) * (l - abs(m))) /
 			(float)((2*l) * (2*l - 1))) *
-				(1.0f - delta(m, 0));
+				(1.0f - DELTA(m, 0));
 	}
 }
 
@@ -117,13 +115,13 @@ float U(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 
 float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	if (m > 0) {
-		return P(R, prev_M, l,  1,  m - 1, n) * sqrt(1.0f + delta(m,  1)) -
-			   P(R, prev_M, l, -1, -m + 1, n) *     (1.0f - delta(m,  1));
+		return P(R, prev_M, l,  1,  m - 1, n) * sqrt(1.0f + DELTA(m,  1)) -
+			   P(R, prev_M, l, -1, -m + 1, n) *     (1.0f - DELTA(m,  1));
 	} else if (m < 0) {
 		// @NOTE: Both Green's and Ivanic' papers are wrong in this case!
 		// Even in Ivanic' Errata this is still wrong
-		return P(R, prev_M, l,  1,  m + 1, n) *     (1.0f - delta(m, -1)) +
-			   P(R, prev_M, l, -1, -m - 1, n) * sqrt(1.0f + delta(m, -1));
+		return P(R, prev_M, l,  1,  m + 1, n) *     (1.0f - DELTA(m, -1)) +
+			   P(R, prev_M, l, -1, -m - 1, n) * sqrt(1.0f + DELTA(m, -1));
 	} else { // If m == 0
 		return P(R, prev_M, l, 1, 1, n) + P(R, prev_M, l, -1, -1, n);
 	}
