@@ -43,7 +43,7 @@ private:
 	float data[4 * SH_NUM_BANDS*SH_NUM_BANDS + 4*SH_NUM_BANDS + 1];
 };
 
-// Kronecker Delta
+// Kronecker Delta, 1 if the supplied indices are the same, 0 ortherwise
 #define DELTA(i, j) (i==j ? 1.0f : 0.0f)
 
 // Formula for the size of the precalulated arrays for u,v,w
@@ -114,14 +114,25 @@ float U(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 }
 
 float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
+	const float sqrt_2 = 1.41421356237f; // Square root of 2
+
 	if (m > 0) {
-		return P(R, prev_M, l,  1,  m - 1, n) * sqrt(1.0f + DELTA(m,  1)) -
-			   P(R, prev_M, l, -1, -m + 1, n) *     (1.0f - DELTA(m,  1));
+		// Branch because of the kronecker delta in the original formula
+		if (m == 1) {
+			return P(R, prev_M, l,  1,  m - 1, n) * sqrt_2;
+		} else {
+			return P(R, prev_M, l,  1,  m - 1, n) - P(R, prev_M, l, -1, -m + 1, n);
+		}
 	} else if (m < 0) {
 		// @NOTE: Both Green's and Ivanic' papers are wrong in this case!
 		// Even in Ivanic' Errata this is still wrong
-		return P(R, prev_M, l,  1,  m + 1, n) *     (1.0f - DELTA(m, -1)) +
-			   P(R, prev_M, l, -1, -m - 1, n) * sqrt(1.0f + DELTA(m, -1));
+
+		// Branch because of the kronecker delta in the original formula
+		if (m == -1) {
+			return P(R, prev_M, l, -1, -m - 1, n) * sqrt_2;
+		} else {
+			return P(R, prev_M, l,  1,  m + 1, n) + P(R, prev_M, l, -1, -m - 1, n);
+		}
 	} else { // If m == 0
 		return P(R, prev_M, l, 1, 1, n) + P(R, prev_M, l, -1, -1, n);
 	}
