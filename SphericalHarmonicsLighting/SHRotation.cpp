@@ -222,15 +222,18 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 			}
 		}
 
-		// Matrix multiply
-		for (int i = 0; i < 2*l + 1; i++) {
+		// Matrix multiply the newly constructed matrix with the appropriate 
+		// input coeffiecients to obtain the appropriate output coffiecients
+		for (int i = -l; i <= l; i++) {
 			glm::vec3 sum(0.0f, 0.0f, 0.0f);
 
-			for (int j = 0; j < 2*l + 1; j++) {
-				sum += matrices[marix_index](i - l, j - l) * coeffs_in[l*l + j];
+			int offset = l*(l+1);
+
+			for (int j = -l; j <= l; j++) {
+				sum += matrices[marix_index](i, j) * coeffs_in[offset + j];
 			}
 
-			coeffs_out[l*l + i] = sum;
+			coeffs_out[offset + i] = sum;
 		}
 
 		previous_index = marix_index;
