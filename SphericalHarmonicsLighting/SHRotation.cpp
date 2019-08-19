@@ -2,6 +2,14 @@
 
 #include "SphericalSamples.h"
 
+#include "ScopedTimer.h"
+
+/*
+	Rotation matrix recurrence relation based on the 1996 paper 
+	“Rotation Matrices for Real Spherical Harmonics”
+	by Ivanic et al (with errata factored in!)
+*/
+
 // Square Matrix of size 2l + 1 for a given l
 // Can be indexed using indices in the range [-l, l]
 struct Matrix {
@@ -41,6 +49,15 @@ private:
 float delta(int i, int j) {
 	return i == j ? 1.0f : 0.0f;
 }
+
+// Formula for the size of the precalulated arrays for u,v,w
+// Derivd by expanding the summation: \sum_{l=0}^{b-1} (2l+1) (2l+1)
+#define SH_COUNT (2*SH_NUM_BANDS * (SH_NUM_BANDS - 1) * (2*SH_NUM_BANDS - 1)) / 3 + 2*SH_NUM_BANDS*SH_NUM_BANDS - SH_NUM_BANDS
+
+// Precalculated arrays to avoid having to calculate the u,v,w functions every time
+float u_array[SH_COUNT];
+float v_array[SH_COUNT];
+float w_array[SH_COUNT];
 
 float u(int l, int m, int n) {
 	if (abs(n) < l) {
@@ -124,9 +141,27 @@ float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	}
 }
 
+void init_sh_rotation() {
+	int index = 1;
+
+	for (int l = 1; l < SH_NUM_BANDS; l++) {
+		for (int m = -l; m <= l; m++) {
+			for (int n = -l; n <= l; n++) {
+				u_array[index] = u(l, m, n);
+				v_array[index] = v(l, m, n);
+				w_array[index] = w(l, m, n);
+
+				index++;
+			}
+		}
+	}
+}
+
 void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 coeffs_out[]) {
 	// Make sure the input and ouput arrays are not the same memory location
 	assert(coeffs_in != coeffs_out);
+
+	ScopedTimer timer("Rotation");
 
 	// Convert the Quaternion into Matrix form
 	glm::mat3 rotation_matrix = glm::mat3_cast(rotation);
@@ -141,26 +176,32 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 	// First harmonic remains unchanged
 	coeffs_out[0] = coeffs_in[0];
 
+	// Allocate 2 matrices, one will be used as the current matrix, the other as the previous
+	// In the next iteration these roles switch
 	Matrix matrices[2];
 	
 	// Initialize first matrix as a 1x1 matrix containing 1
 	matrices[0].set_order(0);
 	matrices[0].set(0, 0, 1.0f);
 
-	int current_index  = 1;
+	int marix_index    = 1;
 	int previous_index = 0;
+
+	// Index for the precalulated u,v,w arrays
+	int index = 1;
 
 	// Iterate over bands
 	for (int l = 1; l < SH_NUM_BANDS; l++) {
-		current_index = l & 1; // Modulo 2 by performing a bitwise AND with 1
-		matrices[current_index].set_order(l);
+		marix_index = l & 1; // Modulo 2 by performing a bitwise AND with 1
+		matrices[marix_index].set_order(l);
 
 		// Create a 2l+1 x 2l+1 Rotation Matrix to rotate the current band
 		for (int m = -l; m <= l; m++) {
 			for (int n = -l; n <= l; n++) {
-				float u_ = u(l, m, n);
-				float v_ = v(l, m, n);
-				float w_ = w(l, m, n);
+				// Look up u,v,w in their precalulated arrays
+				float u_ = u_array[index];
+				float v_ = v_array[index];
+				float w_ = w_array[index];
 
 				float M_mn = 0.0f;
 				// Only calulcate U,V,W if u,v,w are non-zero
@@ -170,7 +211,9 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 				if (v_) M_mn += v_ * V(R, matrices[previous_index], l, m, n);
 				if (w_) M_mn += w_ * W(R, matrices[previous_index], l, m, n);
 
-				matrices[current_index].set(m , n, M_mn);
+				matrices[marix_index].set(m , n, M_mn);
+
+				index++;
 			}
 		}
 
@@ -179,12 +222,12 @@ void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 co
 			glm::vec3 sum(0.0f, 0.0f, 0.0f);
 
 			for (int j = 0; j < 2*l + 1; j++) {
-				sum += matrices[current_index](i - l, j - l) * coeffs_in[l*l + j];
+				sum += matrices[marix_index](i - l, j - l) * coeffs_in[l*l + j];
 			}
 
 			coeffs_out[l*l + i] = sum;
 		}
 
-		previous_index = current_index;
+		previous_index = marix_index;
 	}
 }

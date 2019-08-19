@@ -69,18 +69,19 @@ float Ray::distance(const Triangle& triangle) const {
 	// Calculate the point of intersection between the Ray and Plane
 	glm::vec3 intersection_point = origin + t * direction;
 
-	// Check if the intersection point is inside the triangle
-	float angle = 0.0f;
+	glm::vec3 v0 = triangle.vertices[0] - intersection_point;
+	glm::vec3 v1 = triangle.vertices[1] - intersection_point;
+	glm::vec3 v2 = triangle.vertices[2] - intersection_point;
 
-	for (int i = 0; i < 3; i++)
-	{
-		// Calculate the vector from this vertex to the intersection point
-		const glm::vec3 v_a = triangle.vertices[i        ] - intersection_point;
-		const glm::vec3 v_b = triangle.vertices[(i+1) % 3] - intersection_point;
+	float length0 = glm::length(v0);
+	float length1 = glm::length(v1);
+	float length2 = glm::length(v2);
 
-		// Calculate the angle between these vectors
-		angle += acos(glm::clamp(glm::dot(v_a, v_b) / (glm::length(v_a) * glm::length(v_b)), -1.0f, 1.0f));
-	}
+	// Calculate the angles between these vectors
+	float angle =
+		acos(glm::clamp(glm::dot(v0, v1) / (length0 * length1), -1.0f, 1.0f)) +
+		acos(glm::clamp(glm::dot(v1, v2) / (length1 * length2), -1.0f, 1.0f)) +
+		acos(glm::clamp(glm::dot(v2, v0) / (length2 * length0), -1.0f, 1.0f));
 
 	// If the sum of the angles is greater than 2 pi radians, then the point is inside the triangle
 	if (angle >= 1.99f * PI) {

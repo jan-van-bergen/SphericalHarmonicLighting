@@ -28,6 +28,8 @@ Scene::~Scene() {
 }
 
 void Scene::init() {
+	init_sh_rotation();
+
 	SH_Sample* samples = new SH_Sample[SAMPLE_COUNT];
 	init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
 
