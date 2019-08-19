@@ -27,8 +27,8 @@ glm::vec3 HDRProbeLight::get_light(float theta, float phi) const {
 	const float u = direction.x * r;
 	const float v = direction.y * r;
 
-	const int x = (u * 0.5f + 0.5f) * size;
-	const int y = (v * 0.5f + 0.5f) * size;
+	const int x = (int)(u * 0.5f + 0.5f) * size;
+	const int y = (int)(v * 0.5f + 0.5f) * size;
 
 	assert(data);
 	return data[x * size + y];
