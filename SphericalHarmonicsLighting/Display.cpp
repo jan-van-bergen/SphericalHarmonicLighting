@@ -2,10 +2,6 @@
 
 #include <iostream>
 
-#include <Imgui/imgui.h>
-#include <Imgui/imgui_impl_sdl.h>
-#include <Imgui/imgui_impl_opengl3.h>
-
 Display::Display(u32 width, u32 height, const char* title) : width(width), height(height) {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
