@@ -63,7 +63,6 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 
 		 // Iterate over vertices
 		for (int i = 0; i < vertex_count; i++) {
-
 			// Initialize SH coefficients to 0
 			for (int k = 0; k < SH_COEFFICIENT_COUNT; k++) {
 				transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] = glm::vec3(0.0f, 0.0f, 0.0f);

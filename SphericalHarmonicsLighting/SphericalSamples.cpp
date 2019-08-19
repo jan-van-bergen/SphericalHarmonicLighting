@@ -4,6 +4,9 @@
 
 #include "Util.h"
 
+// Converts l, m representation into a 1 dimensional index
+#define SH_INDEX(l, m) (l * (l+1) + m)
+
 // Precalculated factorial table
 float factorial[] = {
 	1.0f,  
@@ -105,7 +108,6 @@ void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands) {
 	std::mt19937 gen(random_device());
 	std::uniform_real_distribution<float> U01(0.0f, 1.0f);
 
-	int index = 0;
 	for (int i = 0; i < sqrt_n_samples; i++) {
 		for (int j = 0; j < sqrt_n_samples; j++) {
 			// Generate unbiased distribution of spherical coords
@@ -115,9 +117,12 @@ void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands) {
 			// Convert x and y to Spherical Coordinates
 			float theta = 2.0f * acos(sqrt(1.0f - x));
 			float phi   = 2.0f * PI * y;
+			
+			int index = i * sqrt_n_samples + j;
 
+			// Store polar coords
 			samples[index].theta = theta;
-			samples[index].phi = phi;
+			samples[index].phi   = phi;
 
 			// Convert spherical coords to unit vector
 			samples[index].direction = glm::vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
@@ -128,8 +133,6 @@ void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands) {
 					samples[index].coeffs[SH_INDEX(l, m)] = SH(l, m, theta, phi);
 				}
 			}
-
-			index++;
 		}
 	}
 }
@@ -144,8 +147,8 @@ void project_polar_function(PolarFunction fn, int n_samples, const SH_Sample sam
 		float phi   = samples[i].phi;
 
 		// For each SH coefficient
-		for (int n = 0; n < SH_COEFFICIENT_COUNT; n++) {
-			result[n] += fn(theta, phi) * samples[i].coeffs[n];
+		for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
+			result[j] += fn(theta, phi) * samples[i].coeffs[j];
 		}
 	}
 

@@ -6,8 +6,6 @@
 #define SH_NUM_BANDS 5
 #define SH_COEFFICIENT_COUNT (SH_NUM_BANDS * SH_NUM_BANDS)
 
-#define SH_INDEX(l, m) (l * (l+1) + m)
-
 typedef glm::vec3 (*PolarFunction)(float theta, float phi);
 
 // Spherical Harmonics Sample

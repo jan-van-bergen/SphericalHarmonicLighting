@@ -4,7 +4,6 @@
 #include <vector>
 #include <unordered_map>
 
-// @TEMP
 #define Array std::vector
 #define Map   std::unordered_map
 
