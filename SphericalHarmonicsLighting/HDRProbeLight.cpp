@@ -14,6 +14,11 @@ HDRProbeLight::HDRProbeLight(const char* filename, int size) : size(size), data(
 	file.close();
 }
 
+HDRProbeLight::~HDRProbeLight() {
+	assert(data);
+	delete[] data;
+}
+
 glm::vec3 HDRProbeLight::get_light(float theta, float phi) const {
 	const glm::vec3 direction(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
 

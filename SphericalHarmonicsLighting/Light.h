@@ -47,6 +47,7 @@ private:
 
 public:
 	HDRProbeLight(const char* filename, int size);
+	~HDRProbeLight();
 
 	glm::vec3 get_light(float theta, float phi) const;
 };
