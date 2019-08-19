@@ -100,7 +100,7 @@ float SH(int l, int m, float theta, float phi) {
 	}
 } 
 
-// Fills an N*N*2 array with uniformly distributed SH samples across the unit sphere, using jittered stratification
+// Fills an N*N array with uniformly distributed SH samples across the unit sphere, using jittered stratification
 void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands) {
 	const float inv_sqrt_n_samples = 1.0f / sqrt_n_samples;
 
@@ -137,10 +137,9 @@ void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands) {
 	}
 }
 
-void project_polar_function(PolarFunction fn, int n_samples, const SH_Sample samples[], glm::vec3 result[]) {
-	// Weighed by the area of a 3D unit sphere
-	const float weight = 4.0f * PI;
-
+// Projects a given polar function into Spherical Harmonic coefficients.
+// This is done using Monte Carlo integration, using the samples provided in the samples array
+void project_polar_function(PolarFunction polar_function, int n_samples, const SH_Sample samples[], glm::vec3 result[]) {
 	// For each sample
 	for (int i = 0; i < n_samples; i++) {
 		float theta = samples[i].theta;
@@ -148,13 +147,13 @@ void project_polar_function(PolarFunction fn, int n_samples, const SH_Sample sam
 
 		// For each SH coefficient
 		for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
-			result[j] += fn(theta, phi) * samples[i].coeffs[j];
+			result[j] += polar_function(theta, phi) * samples[i].coeffs[j];
 		}
 	}
 
-	// Divide the result by weight and number of samples
-	const float factor = weight / n_samples;
+	//  Weighted by the surface area of a 3D unit sphere, divided by the number of samples
+	const float factor = 4.0f * PI / n_samples;
 	for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 		result[i] *= factor;
 	}
-} 
+}

@@ -85,14 +85,14 @@ float w(int l, int m, int n) {
 }
 
 float P(const Matrix& R, const Matrix& prev_M, int l, int i, int a, int b) {
-	if (abs(b) < l) {
-		return R(i,  0) * prev_M(a, b);
-	} else if (b == l) {
+	if (b == l) {
 		return R(i,  1) * prev_M(a,  l - 1) -
 			   R(i, -1) * prev_M(a, -l + 1);
 	} else if (b == -l) {
 		return R(i,  1) * prev_M(a, -l + 1) +
 			   R(i, -1) * prev_M(a,  l - 1);
+	} else { // If abs(b) < l
+		return R(i,  0) * prev_M(a, b);
 	}
 }
 
@@ -101,9 +101,7 @@ float U(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 }
 
 float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
-	if (m == 0) {
-		return P(R, prev_M, l, 1, 1, n) + P(R, prev_M, l, -1, -1, n);
-	} else if (m > 0) {
+	if (m > 0) {
 		return P(R, prev_M, l,  1,  m - 1, n) * sqrt(1.0f + delta(m,  1)) -
 			   P(R, prev_M, l, -1, -m + 1, n) *     (1.0f - delta(m,  1));
 	} else if (m < 0) {
@@ -111,6 +109,8 @@ float V(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 		// Even in Ivanic' Errata this is still wrong
 		return P(R, prev_M, l,  1,  m + 1, n) *     (1.0f - delta(m, -1)) +
 			   P(R, prev_M, l, -1, -m - 1, n) * sqrt(1.0f + delta(m, -1));
+	} else { // If m == 0
+		return P(R, prev_M, l, 1, 1, n) + P(R, prev_M, l, -1, -1, n);
 	}
 }
 
@@ -119,7 +119,7 @@ float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 
 	if (m > 0) {
 		return P(R, prev_M, l, 1, m + 1, n) + P(R, prev_M, l, -1, -m - 1, n);
-	} else {
+	} else { // If m < 0
 		return P(R, prev_M, l, 1, m - 1, n) - P(R, prev_M, l, -1, -m + 1, n);
 	}
 }
