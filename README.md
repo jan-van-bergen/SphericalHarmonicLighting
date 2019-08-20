@@ -30,7 +30,7 @@ A debug rendering of the KD Tree structure used to raytrace the monkey head mesh
 Because the SH transfer coefficients are calulcated per-vertex, interesting patterns can arise when these coefficients are fed incorrectly to the Vertex Shader:
 
 ![Glitch](Doc/SH Lighting Glitch.png "Glitch")
-![Glitch](Doc/SH Lighting Glitch2.png "Glitch")
+![Glitch](Doc/SH Lighting Glitch 2.png "Glitch")
 
 ### References
 * Green - [Spherical Harmonic Lighting: The Gritty Details](http://silviojemma.com/public/papers/lighting/spherical-harmonic-lighting.pdf).
