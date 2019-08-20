@@ -7,14 +7,14 @@
 #include "ScopedTimer.h"
 
 Scene::Scene() {
-	Mesh monkey = Mesh(DATA_PATH("MonkeySubdivided2.obj"));
-	Mesh plane  = Mesh(DATA_PATH("Plane.obj"));
+	Mesh monkey = Mesh(DATA_PATH("Models/MonkeySubdivided2.obj"));
+	Mesh plane  = Mesh(DATA_PATH("Models/Plane.obj"));
 
 	meshes.emplace_back(monkey);
 	meshes.emplace_back(plane);
 
 	lights.emplace_back(new DirectionalLight());
-	//lights.emplace_back(new HDRProbeLight(DATA_PATH("grace_probe.float"), 1000));
+	//lights.emplace_back(new HDRProbeLight(DATA_PATH("Light Probes/grace_probe.float"), 1000));
 
 	camera = Camera();
 	camera.position    = glm::vec3(0.0f, 0.0f, 10.0f);
