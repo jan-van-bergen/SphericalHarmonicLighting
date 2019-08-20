@@ -9,6 +9,29 @@ An experimental project to explore global illumination techniques that use Spher
 * Lighting is performed on the GPU. The Spherical Harmonic coefficients are stored in a Texture Buffer Object.
 * The engine supports two different types of Light. The first is a simple directional light, the calculation of which is fully synthetic. The second is a probe light, which is based on a provided light probe image, such as those found at <http://www.pauldebevec.com/Probes>.
 
+### Images
+
+# Default Lighting
+Note the soft shadow being cast from the monkey head onto the ground.
+
+![Default Lighting](Doc/Default Light.png "Default Lighting")
+
+# HDR Probe Lighting
+Rendered using the Grace Cathedral light probe.
+
+![HDR Probe Lighting](Doc/HDR Light Probe.png "HDR Probe Lighting")
+
+# KD Tree
+A debug rendering of the KD Tree structure used to raytrace the monkey head mesh.
+
+![KD Tree](Doc/KD Tree.png "KD Tree")
+
+# Glitches
+Because the SH transfer coefficients are calulcated per-vertex, interesting patterns can arise when these coefficients are fed incorrectly to the Vertex Shader:
+
+![Glitch](Doc/SH Lighting Glitch.png "Glitch")
+![Glitch](Doc/SH Lighting Glitch2.png "Glitch")
+
 ### References
 * Green - [Spherical Harmonic Lighting: The Gritty Details](http://silviojemma.com/public/papers/lighting/spherical-harmonic-lighting.pdf).
 * Sloan - [Stupid Spherical Harmonics (SH) Tricks](http://www.ppsloan.org/publications/StupidSH36.pdf).
