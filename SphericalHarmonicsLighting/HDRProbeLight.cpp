@@ -22,14 +22,14 @@ HDRProbeLight::~HDRProbeLight() {
 glm::vec3 HDRProbeLight::get_light(float theta, float phi) const {
 	const glm::vec3 direction(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
 
-	const float r = (1.0f / PI) * acos(direction.z) / sqrt(direction.x*direction.x + direction.y*direction.y);
+	const float r = ONE_OVER_PI * acos(direction.z) / sqrt(direction.x*direction.x + direction.y*direction.y);
 
 	const float u = direction.x * r;
 	const float v = direction.y * r;
 
-	const int x = (int)(u * 0.5f + 0.5f) * size;
-	const int y = (int)(v * 0.5f + 0.5f) * size;
+	const int x = (u * 0.5f + 0.5f) * size;
+	const int y = (v * 0.5f + 0.5f) * size;
 
 	assert(data);
-	return data[x * size + y];
+	return data[x * size + y] * ONE_OVER_PI;
 }
