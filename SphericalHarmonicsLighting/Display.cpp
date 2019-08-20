@@ -23,17 +23,6 @@ Display::Display(u32 width, u32 height, const char* title) : width(width), heigh
 	if (status != GLEW_OK) {
 		std::cerr << "Glew failed to initialize!" << std::endl;
 	}
-
-	closed = false;
-
-	//IMGUI_CHECKVERSION();
-	//ImGui::CreateContext();
-
-	//// Setup Platform/Renderer bindings
-	//ImGui_ImplSDL2_InitForOpenGL(window, context);
-	//ImGui_ImplOpenGL3_Init("#version 130");
-
-	//ImGui::StyleColorsDark();
 }
 
 Display::~Display() {
@@ -44,10 +33,4 @@ Display::~Display() {
 
 void Display::update() {
 	SDL_GL_SwapWindow(window);
-}
-
-void Display::begin_gui() {
-	//ImGui_ImplOpenGL3_NewFrame();
-	//ImGui_ImplSDL2_NewFrame(window);
-	//ImGui::NewFrame();
 }

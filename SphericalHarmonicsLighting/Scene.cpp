@@ -6,7 +6,7 @@
 
 #include "ScopedTimer.h"
 
-Scene::Scene() {
+Scene::Scene() : angle(0) {
 	Mesh monkey = Mesh(DATA_PATH("Models/MonkeySubdivided2.obj"));
 	Mesh plane  = Mesh(DATA_PATH("Models/Plane.obj"));
 
@@ -21,10 +21,12 @@ Scene::Scene() {
 	camera.orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	camera.projection  = glm::perspective(DEG_TO_RAD(45.0f), 1600.0f / 900.0f, 0.1f, 100.0f);
 	//camera.projection  = glm::perspectiveFov(RAD_TO_DEG(110.0f), 1600.0f, 900.0f, 0.1f, 100.0f); // @HARDCODED
+
+	kd_tree = NULL;
 }
 
 Scene::~Scene() {
-	delete kd_tree;
+	if (kd_tree) delete kd_tree;
 }
 
 void Scene::init() {
