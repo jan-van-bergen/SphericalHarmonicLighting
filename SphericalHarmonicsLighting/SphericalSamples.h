@@ -1,8 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
 
-#include "Types.h"
-
 #define SH_NUM_BANDS 5 // @VOLATILE: If this value is changed, the value in the Vertex Shader must also be changed!!
 #define SH_COEFFICIENT_COUNT (SH_NUM_BANDS * SH_NUM_BANDS)
 

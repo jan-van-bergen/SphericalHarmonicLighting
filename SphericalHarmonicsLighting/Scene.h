@@ -2,22 +2,14 @@
 #include <GL/glew.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "AssetLoader.h"
 
 #include "Ray.h"
 #include "KDTree.h"
-#include "SphericalSamples.h"
 
 #include "Light.h"
-
-#include "Types.h"
-#include "Util.h"
-
-#include "VectorMath.h"
 
 #define SQRT_SAMPLE_COUNT 50
 #define SAMPLE_COUNT      (SQRT_SAMPLE_COUNT * SQRT_SAMPLE_COUNT)

@@ -202,6 +202,7 @@
     <ClCompile Include="HDRProbeLight.cpp" />
     <ClCompile Include="KDNodeDebugger.cpp" />
     <ClCompile Include="KDTree.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Scene.cpp" />

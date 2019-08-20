@@ -2,9 +2,17 @@
 
 #include <SDL2/SDL.h>
 
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "VectorMath.h"
+
 #include "SHRotation.h"
+#include "SphericalSamples.h"
 
 #include "ScopedTimer.h"
+
+#include "Util.h"
 
 Scene::Scene() : angle(0) {
 	Mesh monkey = Mesh(DATA_PATH("Models/MonkeySubdivided2.obj"));

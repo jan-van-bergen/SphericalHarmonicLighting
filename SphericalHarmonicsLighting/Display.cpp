@@ -1,6 +1,7 @@
 #include "Display.h"
 
 #include <iostream>
+#include <GL/glew.h>
 
 Display::Display(u32 width, u32 height, const char* title) : width(width), height(height) {
 	SDL_Init(SDL_INIT_EVERYTHING);

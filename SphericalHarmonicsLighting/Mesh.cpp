@@ -1,6 +1,8 @@
 #include "Scene.h"
 
 #include <fstream>
+
+#include "Util.h"
 #include "ScopedTimer.h"
 
 Mesh::Mesh(const char* file_name) : file_name(file_name), mesh_data(AssetLoader::load_mesh(file_name)) {

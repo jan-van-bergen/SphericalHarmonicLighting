@@ -1,7 +1,4 @@
 #pragma once
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-
 #include <SDL2/SDL.h>
 
 #include "Types.h"

@@ -101,5 +101,8 @@
     <ClCompile Include="KDNodeDebugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Source Files\Light</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
