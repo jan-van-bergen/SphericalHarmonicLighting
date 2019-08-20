@@ -30,7 +30,7 @@ Scene::~Scene() {
 }
 
 void Scene::init() {
-	init_sh_rotation();
+	sh_init_rotation();
 
 	SH_Sample* samples = new SH_Sample[SAMPLE_COUNT];
 	init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
@@ -101,7 +101,7 @@ void Scene::update(float delta, const u8* keys) {
 void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
 	glm::vec3 light_coeffs_rotated[SH_COEFFICIENT_COUNT];
 
-	rotate(glm::angleAxis(angle, glm::vec3(0.0f, 1.0f, 0.0f)), lights[0]->coefficients, light_coeffs_rotated);
+	sh_rotate(glm::angleAxis(angle, glm::vec3(0.0f, 1.0f, 0.0f)), lights[0]->coefficients, light_coeffs_rotated);
 
 	glUniform3fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, reinterpret_cast<const GLfloat*>(light_coeffs_rotated));
 
