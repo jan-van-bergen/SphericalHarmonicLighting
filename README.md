@@ -32,6 +32,9 @@ Because the SH transfer coefficients are calulcated per-vertex, interesting patt
 ![Glitch](Doc/SH Lighting Glitch.png "Glitch")
 ![Glitch](Doc/SH Lighting Glitch 2.png "Glitch")
 
+### Building
+The project should work out of the box with Visual Studio 2017 or above.
+
 ### References
 * Green - [Spherical Harmonic Lighting: The Gritty Details](http://silviojemma.com/public/papers/lighting/spherical-harmonic-lighting.pdf).
 * Sloan - [Stupid Spherical Harmonics (SH) Tricks](http://www.ppsloan.org/publications/StupidSH36.pdf).
