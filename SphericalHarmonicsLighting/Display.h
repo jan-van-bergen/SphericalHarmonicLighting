@@ -21,6 +21,6 @@ private:
 	const u32 width;
 	const u32 height;
 
-	SDL_Window* window;
+	SDL_Window *  window;
 	SDL_GLContext context;
 };

@@ -31,8 +31,8 @@ private:
 	GLuint tbo_tex;
 
 public:
-	int       triangle_count;
-	Triangle* triangles;
+	int        triangle_count;
+	Triangle * triangles;
 
 	Material material;
 
@@ -40,8 +40,8 @@ public:
 
 	void init(const Scene& scene, int sample_count, const SH_Sample samples[]);
 	
-	bool      intersects      (const Ray& ray) const;
-	Triangle* closest_triangle(const Ray& ray) const;
+	bool       intersects      (const Ray& ray) const;
+	Triangle * closest_triangle(const Ray& ray) const;
 
 	void render() const;
 };
@@ -71,7 +71,7 @@ public:
 	bool intersects(const Ray& ray) const;
 
 private:
-	KD_Node * kd_tree;
+	KD_Node *        kd_tree;
 	KD_Node_Debugger kd_tree_debugger;
 
 	Array<Mesh>   meshes;

@@ -4,14 +4,14 @@
 class Shader
 {
 public:
-	Shader(const char* vertex_filename, const char* fragment_filename);
+	Shader(const char * vertex_filename, const char * fragment_filename);
 	~Shader();
 
 	inline void bind() const {
 		glUseProgram(program_id);
 	}
 
-	inline GLuint get_uniform(const char* name) const {
+	inline GLuint get_uniform(const char * name) const {
 		return glGetUniformLocation(program_id, name);
 	}
 
@@ -20,7 +20,7 @@ public:
 	}
 
 private:
-	GLuint load_shader(const char* filename, GLuint shader_type) const;
+	GLuint load_shader(const char * filename, GLuint shader_type) const;
 
 	GLuint program_id;
 	GLuint vertex_id;

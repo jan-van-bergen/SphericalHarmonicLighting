@@ -19,8 +19,8 @@ public:
 
 class HDRProbeLight : public Light {
 private:
-	int        size;
-	glm::vec3* data;
+	int         size;
+	glm::vec3 * data;
 
 public:
 	HDRProbeLight(const char* filename, int size);
