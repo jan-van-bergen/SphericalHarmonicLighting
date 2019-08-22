@@ -16,6 +16,9 @@
     <Filter Include="Source Files\Light">
       <UniqueIdentifier>{5084613c-08f6-4d9e-8ec6-03a657ecba3e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\DataStructures">
+      <UniqueIdentifier>{0d294605-4d74-44bd-92a6-cdb8338a7aec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h">
@@ -51,11 +54,17 @@
     <ClInclude Include="Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KDTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ScopedTimer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KDTree.h">
+      <Filter>Header Files\DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="ChunkBuffer.h">
+      <Filter>Header Files\DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="String.h">
+      <Filter>Header Files\DataStructures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -182,6 +182,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AssetLoader.h" />
+    <ClInclude Include="ChunkBuffer.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="KDTree.h" />
     <ClInclude Include="Light.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="SHRotation.h" />
     <ClInclude Include="SphericalSamples.h" />
     <ClInclude Include="ScopedTimer.h" />
+    <ClInclude Include="String.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="VectorMath.h" />
