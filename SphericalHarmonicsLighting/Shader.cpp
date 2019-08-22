@@ -10,8 +10,6 @@
 
 #include "ScopedTimer.h"
 
-const Shader::Defines Shader::empty = { 0, NULL, NULL };
-
 Shader::Shader(const char* vertex_filename, const char* fragment_filename, const char* geometry_filename, const Defines& defines) {
 	// Create Program
 	program_id = glCreateProgram();
@@ -209,6 +207,7 @@ GLuint Shader::load_shader(const char* filename, GLuint shader_type, const Defin
 	// Load shader source recursively
 	load_shader_source(path, filename, source, defines);
 
+	// Copy from the ChunkBuffer into a contiguous buffer
 	int source_length = source.size();
 	char * data = new char[source_length];
 	source.copy_out(data, 0, source_length);

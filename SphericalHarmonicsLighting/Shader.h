@@ -6,7 +6,7 @@
 class Shader {
 public:
 	struct Defines {
-		int count;
+		const int count;
 		const char ** names;
 		const char ** definitions;
 
@@ -17,7 +17,7 @@ public:
 		{ }
 	};
 
-	Shader(const char* vertex_filename, const char* fragment_filename, const char* geometry_filename = nullptr, const Defines& defines = empty);
+	Shader(const char* vertex_filename, const char* fragment_filename, const char* geometry_filename = nullptr, const Defines& defines = Defines(0, nullptr, nullptr));
 	~Shader();
 
 	inline void bind() const {
@@ -31,8 +31,6 @@ public:
 	static void unbind() {
 		glUseProgram(0);
 	}
-
-	static const Defines empty;
 
 private:
 	GLuint load_shader(const char* filename, GLuint shader_type, const Defines& defines) const;
