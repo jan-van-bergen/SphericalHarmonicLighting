@@ -64,25 +64,25 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 		ScopedTimer timer("Mesh");
 
 		 // Iterate over vertices
-		for (int i = 0; i < vertex_count; i++) {
+		for (int v = 0; v < vertex_count; v++) {
 			// Initialize SH coefficients to 0
-			for (int k = 0; k < SH_COEFFICIENT_COUNT; k++) {
-				transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] = glm::vec3(0.0f, 0.0f, 0.0f);
+			for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+				transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] = glm::vec3(0.0f, 0.0f, 0.0f);
 			}
 
 			// Iterate over SH samples
-			for (int j = 0; j < sample_count; j++) {
-				float dot = glm::dot(mesh_data->vertices[i].normal, samples[j].direction);
+			for (int s = 0; s < sample_count; s++) {
+				float dot = glm::dot(mesh_data->vertices[v].normal, samples[s].direction);
 
 				// Only accept samples within the hemisphere defined by the Vertex normal
 				if (dot >= 0.0f) {
-					ray.origin    = mesh_data->vertices[i].position + mesh_data->vertices[i].normal * 0.025f;
-					ray.direction = samples[j].direction;
+					ray.origin    = mesh_data->vertices[v].position + mesh_data->vertices[v].normal * 0.025f;
+					ray.direction = samples[s].direction;
 
 					if (!scene.intersects(ray)) {
-						for (int k = 0; k < SH_COEFFICIENT_COUNT; k++) {
+						for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 							// Add the contribution of this sample
-							transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] += material.diffuse_colour * dot * samples[j].coeffs[k];
+							transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] += material.diffuse_colour * dot * samples[s].coeffs[i];
 						}
 					}
 				}
@@ -91,8 +91,8 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 			const float normalization_factor = 4.0f * PI / sample_count;
 
 			// Normalize coefficients
-			for (int k = 0; k < SH_COEFFICIENT_COUNT; k++) {
-				transfer_coeffs[i * SH_COEFFICIENT_COUNT + k] *= normalization_factor;
+			for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+				transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] *= normalization_factor;
 			}
 
 			//printf("Vertex %u out of %u done\n", i, vertex_count);
