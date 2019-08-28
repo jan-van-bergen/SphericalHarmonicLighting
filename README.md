@@ -4,6 +4,7 @@ An experimental project to explore global illumination techniques that use Spher
 
 ### Features
 * Radiance is calulcated per vertex. The transfer function takes into account the surface normal for direct diffuse lighting. It also takes into account indirect shadowing. This is achieved by performing a raytracing precalculation step.
+* Glossy BDRF support.
 * Raytracing is accelerated using a KD Tree.
 * Spherical Harmonic coefficients can be efficiently rotated using recurrence relations as described in a paper by Ivanic.
 * Lighting is performed on the GPU. The Spherical Harmonic coefficients are stored in a Texture Buffer Object.
@@ -11,15 +12,24 @@ An experimental project to explore global illumination techniques that use Spher
 
 ### Images
 
-# Default Lighting
+# Default Diffuse Lighting
 Note the soft shadow being cast from the monkey head onto the ground.
 
 ![Default Lighting](Doc/Default Light.png "Default Lighting")
 
-# HDR Probe Lighting
+# HDR Probe Diffuse Lighting
 Rendered using the Grace Cathedral light probe.
 
 ![HDR Probe Lighting](Doc/HDR Light Probe.png "HDR Probe Lighting")
+
+# Default Glossy Lighting
+
+![Default Glossy](Doc/Glossy 2.png "Default Glossy")
+
+# HDR Probe Glossy Lighting
+Rendered using the Grace Cathedral light probe.
+
+![HDR Probe Glossy](Doc/Glossy.png "HDR Probe Glossy")
 
 # KD Tree
 A debug rendering of the KD Tree structure used to raytrace the monkey head mesh.
