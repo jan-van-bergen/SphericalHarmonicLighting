@@ -47,6 +47,8 @@ The project should work out of the box with Visual Studio 2017 or above.
 
 ### References
 * Green - [Spherical Harmonic Lighting: The Gritty Details](http://silviojemma.com/public/papers/lighting/spherical-harmonic-lighting.pdf).
+* Sloan et al. - [Precomputed Radiance Transfer for Real-Time Rendering in Dynamic, Low-Frequency Lighting Environments](https://sites.fas.harvard.edu/~cs278/papers/prt.pdf).
 * Sloan - [Stupid Spherical Harmonics (SH) Tricks](http://www.ppsloan.org/publications/StupidSH36.pdf).
 * Ivanic et al. - [Rotation Matrices
 for Real Spherical Harmonics. Direct Determination by Recursion](https://pubs.acs.org/doi/pdfplus/10.1021/jp9833350). **NOTE: even though this is the errata, it still contains an error in the equation for V when m < 0! The correct equation is implemented in `SHRotation.cpp`!**
+* Ramamoorthi & Hanrahan - [An Efficient Representation for Irradiance Environment Maps](https://cseweb.ucsd.edu/~ravir/papers/envmap/envmap.pdf).
