@@ -7,8 +7,8 @@
 // Converts l, m representation into a 1 dimensional index
 #define SH_INDEX(l, m) (l * (l+1) + m)
 
-// Precalculated factorial table
-float factorial[] = {
+// Precalculated factorial table, starts at 0! and goes up to 33!
+float factorial[34] = {
 	1.0f,  
 	1.0f,
 	2.0f,
@@ -155,5 +155,28 @@ void project_polar_function(PolarFunction polar_function, int n_samples, const S
 	const float factor = 4.0f * PI / n_samples;
 	for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 		result[i] *= factor;
+	}
+}
+
+// Formula from "An Efficient Representation for Irradiance Environment Maps" by Ramamoorthi and Hanrahan
+void calc_phong_lobe_coeffs(float result[SH_NUM_BANDS]) {
+	assert(SH_NUM_BANDS > 0);
+
+	result[0] = PI;
+
+	if (SH_NUM_BANDS == 1) return;
+
+	result[1] = 2.0f * PI / 3.0f;
+
+	// Even bands have a formula
+	for (int l = 2; l < SH_NUM_BANDS; l += 2) {
+		result[l] = 2.0f * PI * 
+			(pow(-1.0f, (l >> 1) - 1) / (float)((l + 2) * (l - 1))) *
+			((factorial[l]) / ((1 << l) * factorial[l >> 1] * factorial[l >> 1]));
+	}
+
+	// Odd bands (> 1) are zero
+	for (int l = 3; l < SH_NUM_BANDS; l += 2) {
+		result[l] = 0.0f;
 	}
 }

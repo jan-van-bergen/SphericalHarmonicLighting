@@ -5,6 +5,11 @@
 #include "Util.h"
 #include "ScopedTimer.h"
 
+struct Vertex {
+	glm::vec3 position;
+	glm::vec3 normal;
+};
+
 Mesh::Mesh(const char* file_name) : file_name(file_name), mesh_data(AssetLoader::load_mesh(file_name)) {
 	assert(mesh_data->index_count % 3 == 0);
 
@@ -30,16 +35,17 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 	const int vertex_count = mesh_data->vertex_count;
 	const int index_count  = mesh_data->index_count;
 
-	glm::vec3* positions       = new glm::vec3[vertex_count];
-	glm::vec3* transfer_coeffs = new glm::vec3[vertex_count * SH_COEFFICIENT_COUNT];
+	Vertex    * vertices        = new Vertex[vertex_count];
+	glm::vec3 * transfer_coeffs = new glm::vec3[vertex_count * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT];
 
 	for (int i = 0; i < vertex_count; i++) {
 		// Copy positions
-		positions[i] = mesh_data->vertices[i].position;
+		vertices[i].position = mesh_data->vertices[i].position;
+		vertices[i].normal   = mesh_data->vertices[i].normal;
 	}
 	
 	u32 length = strlen(file_name);
-	char* dat_file_name = new char[length + 1];
+	char * dat_file_name = new char[length + 1];
 	strcpy_s(dat_file_name, length + 1, file_name);
 
 	// Replace .obj with .dat
@@ -56,7 +62,7 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 			abort();
 		}
 
-		in_file.read(reinterpret_cast<char*>(transfer_coeffs), vertex_count * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
+		in_file.read(reinterpret_cast<char*>(transfer_coeffs), vertex_count * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
 		in_file.close();
 	} else {
 		Ray ray;
@@ -66,8 +72,8 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 		 // Iterate over vertices
 		for (int v = 0; v < vertex_count; v++) {
 			// Initialize SH coefficients to 0
-			for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-				transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] = glm::vec3(0.0f, 0.0f, 0.0f);
+			for (int i = 0; i < SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT; i++) {
+				transfer_coeffs[v * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT + i] = glm::vec3(0.0f, 0.0f, 0.0f);
 			}
 
 			// Iterate over SH samples
@@ -80,9 +86,11 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 					ray.direction = samples[s].direction;
 
 					if (!scene.intersects(ray)) {
-						for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-							// Add the contribution of this sample
-							transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] += material.diffuse_colour * dot * samples[s].coeffs[i];
+						for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
+							for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+								// Add the contribution of this sample
+								transfer_coeffs[v * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT + j * SH_COEFFICIENT_COUNT + i] += samples[s].coeffs[j] * samples[s].coeffs[i];
+							}
 						}
 					}
 				}
@@ -91,24 +99,24 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 			const float normalization_factor = 4.0f * PI / sample_count;
 
 			// Normalize coefficients
-			for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-				transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] *= normalization_factor;
+			for (int i = 0; i < SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT; i++) {
+				transfer_coeffs[v * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT + i] *= normalization_factor;
 			}
 
-			//printf("Vertex %u out of %u done\n", i, vertex_count);
+			printf("Vertex %u out of %u done\n", v, vertex_count);
 		}
 
 		std::ofstream out_file(dat_file_name, std::ios::out | std::ios::binary | std::ios::trunc);
 		{
 			out_file.write(reinterpret_cast<const char*>(&vertex_count), sizeof(u32));
-			out_file.write(reinterpret_cast<const char*>(transfer_coeffs), vertex_count * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
+			out_file.write(reinterpret_cast<const char*>(transfer_coeffs), vertex_count * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
 		}
 		out_file.close();
 	}
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(glm::vec3), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(Vertex), vertices, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -116,13 +124,13 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 
 	glGenBuffers(1, &tbo);
 	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
-	glBufferData(GL_TEXTURE_BUFFER, vertex_count * SH_COEFFICIENT_COUNT * sizeof(glm::vec3), transfer_coeffs, GL_STATIC_DRAW);
+	glBufferData(GL_TEXTURE_BUFFER, vertex_count * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT * sizeof(glm::vec3), transfer_coeffs, GL_STATIC_DRAW);
 
 	glGenTextures(1, &tbo_tex);
 	glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, tbo);
 
-	delete[] positions;
+	delete[] vertices;
 	delete[] transfer_coeffs;
 	
 	delete[] dat_file_name;
@@ -169,12 +177,15 @@ void Mesh::render() const {
 	glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
 
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0); // Position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),                 0); // Position
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12); // Normal
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, NULL);
 
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 }

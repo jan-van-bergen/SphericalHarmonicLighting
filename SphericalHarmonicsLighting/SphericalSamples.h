@@ -18,3 +18,5 @@ struct SH_Sample {
 void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands);
 
 void project_polar_function(PolarFunction fn, int n_samples, const SH_Sample samples[], glm::vec3 result[]);
+
+void calc_phong_lobe_coeffs(float result[SH_NUM_BANDS]);

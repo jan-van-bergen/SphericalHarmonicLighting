@@ -106,13 +106,14 @@ void Scene::update(float delta, const u8* keys) {
 	angle = fmod(angle + delta, 2.0f * PI);
 }
 
-void Scene::render(GLuint uni_view_projection, GLuint uni_light_coeffs) const {
+void Scene::render(GLuint uni_camera_position, GLuint uni_view_projection, GLuint uni_light_coeffs) const {
 	glm::vec3 light_coeffs_rotated[SH_COEFFICIENT_COUNT];
 
 	sh_rotate(glm::angleAxis(angle, glm::vec3(0.0f, 1.0f, 0.0f)), lights[0]->coefficients, light_coeffs_rotated);
 
 	glUniform3fv(uni_light_coeffs, SH_COEFFICIENT_COUNT, reinterpret_cast<const GLfloat*>(light_coeffs_rotated));
 
+	glUniform3f(uni_camera_position, camera.position.x, camera.position.y, camera.position.z);
 	glUniformMatrix4fv(uni_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
 
 	for (int i = 0; i < meshes.size(); i++) {

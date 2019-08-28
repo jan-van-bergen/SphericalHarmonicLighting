@@ -64,7 +64,7 @@ public:
 
 	void update(float delta, const u8* keys);
 
-	void render(GLuint uni_view_projection, GLuint uni_light_coeffs) const;
+	void render(GLuint uni_camera_position, GLuint uni_view_projection, GLuint uni_light_coeffs) const;
 
 	void debug(GLuint uni_debug_view_projection) const;
 
