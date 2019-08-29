@@ -112,18 +112,21 @@ float SH(int l, int m, float theta, float phi) {
 	}
 } 
 
-void main() {	
-	vec3 L[SH_COEFFICIENT_COUNT];
+void main() {
+	vec3 transfer_coeffs[SH_COEFFICIENT_COUNT];
+	// Initialize transfer coefficients to zero
 	for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-		L[i] = vec3(0.0f, 0.0f, 0.0f);
+		transfer_coeffs[i] = vec3(0.0f, 0.0f, 0.0f);
 	}
 	
+	// Find the starting offset in the TBO
+	// Each vertex has a SH_COEFFICIENT_COUNT x SH_COEFFICIENT_COUNT matrix
 	int vertex_offset = gl_VertexID * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT;
 	
 	// Matrix multiplication, multiply transfer matrix with light coefficients
 	for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
 		for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-			L[j] += texelFetch(tbo_texture, vertex_offset + j * SH_COEFFICIENT_COUNT + i).rgb * light_coeffs[i];
+			transfer_coeffs[j] += texelFetch(tbo_texture, vertex_offset + j * SH_COEFFICIENT_COUNT + i).rgb * light_coeffs[i];
 		}
 	}
 	
@@ -131,11 +134,12 @@ void main() {
 	vec3 to_camera = camera_position - position_in;
 	vec3 R = -normalize(reflect(to_camera, normal_in));
 	
-	// Convert reflection direction R into spherical coordinates
+	// Convert reflection direction R into spherical coordinates (R_theta, R_phi)
 	float R_theta       = acos(R.z);
 	float inv_sin_theta = 1.0f / sin(R_theta);
 	float R_phi         = acos(clamp(R.x * inv_sin_theta, -1.0f, 1.0f));
 	
+	// Keep phi in the range [0, 2 pi]
 	if (R.y * inv_sin_theta < 0.0f) {
         R_phi = 2.0f * pi - R_phi;
 	}
@@ -145,7 +149,7 @@ void main() {
 	int index = 0;
 	for (int l = 0; l < SH_NUM_BANDS; l++) {
 		for (int m = -l; m <= l; m++) {
-			colour += phong_lobe_coeffs[l] * L[index++] * SH(l, m, R_theta, R_phi);
+			colour += phong_lobe_coeffs[l] * transfer_coeffs[index++] * SH(l, m, R_theta, R_phi);
 		}
 	}
 

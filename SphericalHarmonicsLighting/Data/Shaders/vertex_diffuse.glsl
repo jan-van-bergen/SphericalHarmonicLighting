@@ -17,6 +17,8 @@ uniform mat4 view_projection;
 void main() {
 	vec3 colour = vec3(0.0f, 0.0f, 0.0f);
 
+	// Compute the spherical integral between the lighting function and the transfer function.
+	// Using Spherical Harmonics this means a simple dot product between two SH coefficient vectors.
 	for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 		colour += light_coeffs[i] * texelFetch(tbo_texture, gl_VertexID * SH_COEFFICIENT_COUNT + i).rgb;
 	}

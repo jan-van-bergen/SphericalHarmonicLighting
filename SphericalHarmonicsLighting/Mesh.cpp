@@ -114,6 +114,8 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 
 					if (!scene.intersects(ray)) {
 						switch (material.shader.type) {
+							// For diffuse materials, compose the transfer vector.
+							// This vector includes the BDRF, incorporating the albedo colour, a lambertian diffuse factor (dot) and a SH sample
 							case MeshShader::Type::DIFFUSE: {
 								for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 									// Add the contribution of this sample
@@ -121,6 +123,8 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 								}
 							} break;
 
+							// For glossy materials, compose the transfer matrix.
+							// This matrix does not include the BDRF, incorporating only two SH samples
 							case MeshShader::Type::GLOSSY: {
 								for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
 									for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
@@ -144,6 +148,7 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 			printf("Vertex %u out of %u done\n", v, vertex_count);
 		}
 
+		// Save the coefficients to a file so that they can be reloaded at a later time
 		std::ofstream out_file(transfer_coeffs_file_name, std::ios::out | std::ios::binary | std::ios::trunc);
 		{
 			// Write vertx count
