@@ -166,13 +166,13 @@ void calc_phong_lobe_coeffs(float result[SH_NUM_BANDS]) {
 
 	if (SH_NUM_BANDS == 1) return;
 
-	result[1] = 2.0f * PI / 3.0f;
+	result[1] = (2.0f * PI) / 3.0f;
 
 	// Even bands have a formula
 	for (int l = 2; l < SH_NUM_BANDS; l += 2) {
 		result[l] = 2.0f * PI * 
 			(pow(-1.0f, (l >> 1) - 1) / (float)((l + 2) * (l - 1))) *
-			((factorial[l]) / ((1 << l) * factorial[l >> 1] * factorial[l >> 1]));
+			((factorial[l]) / ((float)(1 << l) * factorial[l >> 1] * factorial[l >> 1]));
 	}
 
 	// Odd bands (> 1) are zero
