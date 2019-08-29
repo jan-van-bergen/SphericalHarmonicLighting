@@ -10,11 +10,8 @@ const char * diffuse_define_definitions[diffuse_define_count] = {
 const Shader::Defines diffuse_defines(diffuse_define_count, diffuse_define_names, diffuse_define_definitions);
 
 DiffuseShader::DiffuseShader() : 
-	MeshShader(DATA_PATH("Shaders/vertex_diffuse.glsl"), DATA_PATH("Shaders/fragment.glsl"), nullptr, diffuse_defines) 
-
-	{ 
-
-	};
+	MeshShader(Type::DIFFUSE, DATA_PATH("Shaders/vertex_diffuse.glsl"), DATA_PATH("Shaders/fragment.glsl"), nullptr, diffuse_defines) 
+	{ };
 
 const int glossy_define_count = 2;
 const char * glossy_define_names[glossy_define_count] = {
@@ -28,7 +25,7 @@ const char * glossy_define_definitions[glossy_define_count] = {
 const Shader::Defines glossy_defines(glossy_define_count, glossy_define_names, glossy_define_definitions);
 
 GlossyShader::GlossyShader() : 
-	MeshShader(DATA_PATH("Shaders/vertex_glossy.glsl"), DATA_PATH("Shaders/fragment.glsl"), nullptr, glossy_defines),
+	MeshShader(Type::GLOSSY, DATA_PATH("Shaders/vertex_glossy.glsl"), DATA_PATH("Shaders/fragment.glsl"), nullptr, glossy_defines),
 
 	uni_phong_lobe_coeffs(get_uniform("phong_lobe_coeffs")),
 	uni_camera_position  (get_uniform("camera_position"))

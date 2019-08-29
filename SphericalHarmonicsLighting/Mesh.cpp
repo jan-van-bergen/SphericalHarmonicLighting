@@ -10,7 +10,7 @@ struct Vertex {
 	glm::vec3 normal;
 };
 
-Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_name), mesh_data(AssetLoader::load_mesh(file_name)), shader(shader) {
+Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_name), mesh_data(AssetLoader::load_mesh(file_name)), material(shader) {
 	assert(mesh_data->index_count % 3 == 0);
 
 	triangle_count = mesh_data->index_count / 3;
@@ -43,8 +43,8 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 	strcpy_s(transfer_coeffs_file_name, file_name_length + 1, file_name);
 
 	int transfer_coeff_count = -1;
-	switch (material.type) {
-		case Material::Type::DIFFUSE: {
+	switch (material.shader.type) {
+		case MeshShader::Type::DIFFUSE: {
 			// For diffuse transfer functions we use a SH_COEFFICIENT_COUNT dimensional vector
 			transfer_coeff_count = SH_COEFFICIENT_COUNT;
 
@@ -52,7 +52,7 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 			strcpy_s(transfer_coeffs_file_name + file_name_length - 4, strlen(diffuse_str) + 1, diffuse_str);
 		} break;
 
-		case Material::Type::GLOSSY: {
+		case MeshShader::Type::GLOSSY: {
 			// For glossy transfer functions we use a SH_COEFFICIENT_COUNT x SH_COEFFICIENT_COUNT matrix
 			transfer_coeff_count = SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT;
 
@@ -113,19 +113,19 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 					ray.direction = samples[s].direction;
 
 					if (!scene.intersects(ray)) {
-						switch (material.type) {
-							case Material::Type::DIFFUSE: {
+						switch (material.shader.type) {
+							case MeshShader::Type::DIFFUSE: {
 								for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 									// Add the contribution of this sample
 									transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] += material.diffuse_colour * dot * samples[s].coeffs[i];
 								}
 							} break;
 
-							case Material::Type::GLOSSY: {
+							case MeshShader::Type::GLOSSY: {
 								for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
 									for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 										// Add the contribution of this sample
-										transfer_coeffs[v * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT + j * SH_COEFFICIENT_COUNT + i] += samples[s].coeffs[j] * samples[s].coeffs[i];
+										transfer_coeffs[(v * SH_COEFFICIENT_COUNT + j) * SH_COEFFICIENT_COUNT + i] += samples[s].coeffs[j] * samples[s].coeffs[i];
 									}
 								}
 							} break;
@@ -212,7 +212,7 @@ Triangle* Mesh::closest_triangle(const Ray& ray) const {
 }
 
 void Mesh::render() const {
-	shader.bind();
+	material.shader.bind();
 
 	// Bind TBO
 	glActiveTexture(GL_TEXTURE0);

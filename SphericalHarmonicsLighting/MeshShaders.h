@@ -4,14 +4,20 @@
 #include "Shader.h"
 #include "SphericalSamples.h"
 
+// Base class that provides the abstraction to differentiate between Diffuse and Glossy materials
 class MeshShader : public Shader {
 public:
-	MeshShader(
+	const enum Type { DIFFUSE, GLOSSY } type;
+
+	inline MeshShader(
+		Type type,
 		const char* vertex_filename, 
 		const char* fragment_filename, 
 		const char* geometry_filename = nullptr, 
 		const Defines& defines = Defines(0, nullptr, nullptr)) :
 		Shader(vertex_filename, fragment_filename, geometry_filename, defines),
+
+		type(type),
 
 		uni_tbo_texture    (get_uniform("tbo_texture")),
 		uni_light_coeffs   (get_uniform("light_coeffs")),
@@ -41,9 +47,6 @@ protected:
 class DiffuseShader : public MeshShader {
 public:
 	DiffuseShader();
-
-private:
-
 };
 
 class GlossyShader : public MeshShader {

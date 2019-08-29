@@ -17,9 +17,11 @@
 #define SAMPLE_COUNT      (SQRT_SAMPLE_COUNT * SQRT_SAMPLE_COUNT)
 
 struct Material {
-	enum Type { DIFFUSE, GLOSSY } type = Type::DIFFUSE;
+	const MeshShader& shader;
 
 	glm::vec3 diffuse_colour = glm::vec3(1.0f, 1.0f, 1.0f);
+
+	inline Material(const MeshShader& shader) : shader(shader) { };
 };
 
 class Scene; // Forward Declaration needed by Mesh
@@ -29,8 +31,6 @@ private:
 	const char* file_name;
 	const AssetLoader::MeshData* mesh_data;
 
-	const MeshShader& shader;
-	
 	GLuint vbo;
 	GLuint ibo;
 	GLuint tbo;

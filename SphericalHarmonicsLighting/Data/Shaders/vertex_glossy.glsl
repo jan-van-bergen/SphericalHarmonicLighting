@@ -112,17 +112,6 @@ float SH(int l, int m, float theta, float phi) {
 	}
 } 
 
-float atan2(float y, float x) {
-    // The result is now in [0, PI].
-    float result = acos(clamp(x, -1.0f, 1.0f));
-	
-    if (y < 0.0f) {
-        result = 2.0f * pi - result;
-	}
-	
-    return result;
-}
-
 void main() {	
 	vec3 L[SH_COEFFICIENT_COUNT];
 	for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
@@ -145,7 +134,11 @@ void main() {
 	// Convert reflection direction R into spherical coordinates
 	float R_theta       = acos(R.z);
 	float inv_sin_theta = 1.0f / sin(R_theta);
-	float R_phi         = atan2(R.y * inv_sin_theta, R.x * inv_sin_theta);
+	float R_phi         = acos(clamp(R.x * inv_sin_theta, -1.0f, 1.0f));
+	
+	if (R.y * inv_sin_theta < 0.0f) {
+        R_phi = 2.0f * pi - R_phi;
+	}
 	
 	vec3 colour = vec3(0.0f, 0.0f, 0.0f);
 

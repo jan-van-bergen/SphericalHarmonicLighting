@@ -15,10 +15,7 @@
 
 Scene::Scene() : shader_diffuse(), shader_glossy(), angle(0) {
 	Mesh monkey = Mesh(DATA_PATH("Models/MonkeySubdivided2.obj"), shader_glossy);
-	monkey.material.type = Material::Type::GLOSSY;
-
-	Mesh plane = Mesh(DATA_PATH("Models/Plane.obj"), shader_diffuse);
-	plane.material.type = Material::Type::DIFFUSE;
+	Mesh plane  = Mesh(DATA_PATH("Models/Plane.obj"),             shader_diffuse);
 
 	meshes.emplace_back(monkey);
 	meshes.emplace_back(plane);
