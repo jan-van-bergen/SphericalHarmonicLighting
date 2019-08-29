@@ -45,6 +45,13 @@ Because the SH transfer coefficients are calulcated per-vertex, interesting patt
 ### Building
 The project should work out of the box with Visual Studio 2017 or above.
 
+### Dependencies
+* Assimp
+* GLEW
+* GLM
+* SDL 2
+* STB Image
+
 ### References
 * Green - [Spherical Harmonic Lighting: The Gritty Details](http://silviojemma.com/public/papers/lighting/spherical-harmonic-lighting.pdf).
 * Sloan et al. - [Precomputed Radiance Transfer for Real-Time Rendering in Dynamic, Low-Frequency Lighting Environments](https://sites.fas.harvard.edu/~cs278/papers/prt.pdf).
