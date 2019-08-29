@@ -20,6 +20,7 @@ Scene::Scene() : shader_diffuse(), shader_glossy(), angle(0) {
 	meshes.emplace_back(monkey);
 	meshes.emplace_back(plane);
 
+	// @TODO: maybe make the Light a user choice?
 	lights.emplace_back(new DirectionalLight());
 	//lights.emplace_back(new HDRProbeLight(DATA_PATH("Light Probes/grace_probe.float"), 1000));
 
@@ -27,8 +28,7 @@ Scene::Scene() : shader_diffuse(), shader_glossy(), angle(0) {
 	camera.position    = glm::vec3(0.0f, 0.0f, 10.0f);
 	camera.orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	camera.projection  = glm::perspective(DEG_TO_RAD(45.0f), 1600.0f / 900.0f, 0.1f, 100.0f);
-	//camera.projection  = glm::perspectiveFov(RAD_TO_DEG(110.0f), 1600.0f, 900.0f, 0.1f, 100.0f); // @HARDCODED
-
+	
 	kd_tree = nullptr;
 }
 
