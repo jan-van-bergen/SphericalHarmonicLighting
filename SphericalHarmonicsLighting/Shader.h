@@ -1,7 +1,7 @@
 #pragma once
-#include <string>
-
 #include <GL/glew.h>
+
+#include "Util.h"
 
 class Shader {
 public:

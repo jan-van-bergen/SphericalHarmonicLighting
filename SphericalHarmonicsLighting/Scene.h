@@ -11,10 +11,14 @@
 
 #include "Light.h"
 
+#include "MeshShaders.h"
+
 #define SQRT_SAMPLE_COUNT 50
 #define SAMPLE_COUNT      (SQRT_SAMPLE_COUNT * SQRT_SAMPLE_COUNT)
 
 struct Material {
+	enum Type { DIFFUSE, GLOSSY } type = Type::DIFFUSE;
+
 	glm::vec3 diffuse_colour = glm::vec3(1.0f, 1.0f, 1.0f);
 };
 
@@ -24,6 +28,8 @@ struct Mesh {
 private:
 	const char* file_name;
 	const AssetLoader::MeshData* mesh_data;
+
+	const MeshShader& shader;
 	
 	GLuint vbo;
 	GLuint ibo;
@@ -36,7 +42,7 @@ public:
 
 	Material material;
 
-	Mesh(const char* file_name);
+	Mesh(const char* file_name, const MeshShader& shader);
 
 	void init(const Scene& scene, int sample_count, const SH_Sample samples[]);
 	
@@ -64,13 +70,16 @@ public:
 
 	void update(float delta, const u8* keys);
 
-	void render(GLuint uni_camera_position, GLuint uni_view_projection, GLuint uni_light_coeffs) const;
+	void render() const;
 
 	void debug(GLuint uni_debug_view_projection) const;
 
 	bool intersects(const Ray& ray) const;
 
 private:
+	const DiffuseShader shader_diffuse;
+	const GlossyShader  shader_glossy;
+
 	KD_Node *        kd_tree;
 	KD_Node_Debugger kd_tree_debugger;
 

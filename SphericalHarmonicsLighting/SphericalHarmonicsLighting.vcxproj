@@ -186,6 +186,7 @@
     <ClInclude Include="Display.h" />
     <ClInclude Include="KDTree.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="MeshShaders.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshShaders.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SHRotation.cpp" />

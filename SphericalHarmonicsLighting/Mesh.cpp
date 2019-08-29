@@ -10,7 +10,7 @@ struct Vertex {
 	glm::vec3 normal;
 };
 
-Mesh::Mesh(const char* file_name) : file_name(file_name), mesh_data(AssetLoader::load_mesh(file_name)) {
+Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_name), mesh_data(AssetLoader::load_mesh(file_name)), shader(shader) {
 	assert(mesh_data->index_count % 3 == 0);
 
 	triangle_count = mesh_data->index_count / 3;
@@ -35,25 +35,42 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 	const int vertex_count = mesh_data->vertex_count;
 	const int index_count  = mesh_data->index_count;
 
-	Vertex    * vertices        = new Vertex[vertex_count];
-	glm::vec3 * transfer_coeffs = new glm::vec3[vertex_count * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT];
+	Vertex * vertices = new Vertex[vertex_count];
 
+	char transfer_coeffs_file_name[1024];
+
+	u32 file_name_length = strlen(file_name);
+	strcpy_s(transfer_coeffs_file_name, file_name_length + 1, file_name);
+
+	int transfer_coeff_count = -1;
+	switch (material.type) {
+		case Material::Type::DIFFUSE: {
+			// For diffuse transfer functions we use a SH_COEFFICIENT_COUNT dimensional vector
+			transfer_coeff_count = SH_COEFFICIENT_COUNT;
+
+			const char * diffuse_str = "_diffuse.dat";
+			strcpy_s(transfer_coeffs_file_name + file_name_length - 4, strlen(diffuse_str) + 1, diffuse_str);
+		} break;
+
+		case Material::Type::GLOSSY: {
+			// For glossy transfer functions we use a SH_COEFFICIENT_COUNT x SH_COEFFICIENT_COUNT matrix
+			transfer_coeff_count = SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT;
+
+			const char * glossy_str = "_glossy.dat";
+			strcpy_s(transfer_coeffs_file_name + file_name_length - 4, strlen(glossy_str) + 1, glossy_str);
+		} break;
+	}
+	glm::vec3 * transfer_coeffs = new glm::vec3[vertex_count * transfer_coeff_count];
+
+	// Copy positions and normals
 	for (int i = 0; i < vertex_count; i++) {
-		// Copy positions
 		vertices[i].position = mesh_data->vertices[i].position;
 		vertices[i].normal   = mesh_data->vertices[i].normal;
 	}
+
+	bool generate = true;
 	
-	u32 length = strlen(file_name);
-	char * dat_file_name = new char[length + 1];
-	strcpy_s(dat_file_name, length + 1, file_name);
-
-	// Replace .obj with .dat
-	dat_file_name[length - 3] = 'd';
-	dat_file_name[length - 2] = 'a';
-	dat_file_name[length - 1] = 't';
-
-	std::ifstream in_file(dat_file_name, std::ios::in | std::ios::binary); 
+	std::ifstream in_file(transfer_coeffs_file_name, std::ios::in | std::ios::binary); 
 	if (in_file.is_open()) {
 		u32 file_vertex_count;
 		in_file.read(reinterpret_cast<char*>(&file_vertex_count), sizeof(u32));
@@ -62,9 +79,19 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 			abort();
 		}
 
-		in_file.read(reinterpret_cast<char*>(transfer_coeffs), vertex_count * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
+		u32 file_transfer_count;
+		in_file.read(reinterpret_cast<char*>(&file_transfer_count), sizeof(u32));
+
+		if (file_transfer_count == transfer_coeff_count) {
+			generate = false;
+
+			in_file.read(reinterpret_cast<char*>(transfer_coeffs), vertex_count * transfer_coeff_count * sizeof(glm::vec3));
+		}
+
 		in_file.close();
-	} else {
+	} 
+	
+	if (generate) {
 		Ray ray;
 		
 		ScopedTimer timer("Mesh");
@@ -72,8 +99,8 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 		 // Iterate over vertices
 		for (int v = 0; v < vertex_count; v++) {
 			// Initialize SH coefficients to 0
-			for (int i = 0; i < SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT; i++) {
-				transfer_coeffs[v * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT + i] = glm::vec3(0.0f, 0.0f, 0.0f);
+			for (int i = 0; i < transfer_coeff_count; i++) {
+				transfer_coeffs[v * transfer_coeff_count + i] = glm::vec3(0.0f, 0.0f, 0.0f);
 			}
 
 			// Iterate over SH samples
@@ -86,11 +113,22 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 					ray.direction = samples[s].direction;
 
 					if (!scene.intersects(ray)) {
-						for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
-							for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-								// Add the contribution of this sample
-								transfer_coeffs[v * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT + j * SH_COEFFICIENT_COUNT + i] += samples[s].coeffs[j] * samples[s].coeffs[i];
-							}
+						switch (material.type) {
+							case Material::Type::DIFFUSE: {
+								for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+									// Add the contribution of this sample
+									transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] += material.diffuse_colour * dot * samples[s].coeffs[i];
+								}
+							} break;
+
+							case Material::Type::GLOSSY: {
+								for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
+									for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+										// Add the contribution of this sample
+										transfer_coeffs[v * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT + j * SH_COEFFICIENT_COUNT + i] += samples[s].coeffs[j] * samples[s].coeffs[i];
+									}
+								}
+							} break;
 						}
 					}
 				}
@@ -99,17 +137,21 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 			const float normalization_factor = 4.0f * PI / sample_count;
 
 			// Normalize coefficients
-			for (int i = 0; i < SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT; i++) {
-				transfer_coeffs[v * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT + i] *= normalization_factor;
+			for (int i = 0; i < transfer_coeff_count; i++) {
+				transfer_coeffs[v * transfer_coeff_count + i] *= normalization_factor;
 			}
 
 			printf("Vertex %u out of %u done\n", v, vertex_count);
 		}
 
-		std::ofstream out_file(dat_file_name, std::ios::out | std::ios::binary | std::ios::trunc);
+		std::ofstream out_file(transfer_coeffs_file_name, std::ios::out | std::ios::binary | std::ios::trunc);
 		{
+			// Write vertx count
 			out_file.write(reinterpret_cast<const char*>(&vertex_count), sizeof(u32));
-			out_file.write(reinterpret_cast<const char*>(transfer_coeffs), vertex_count * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT * sizeof(glm::vec3));
+			// Write transfer coefficient count
+			out_file.write(reinterpret_cast<const char*>(&transfer_coeff_count), sizeof(u32));
+			// Write the actual data, either the transfer vector or the transfer matrix
+			out_file.write(reinterpret_cast<const char*>(transfer_coeffs), vertex_count * transfer_coeff_count * sizeof(glm::vec3));
 		}
 		out_file.close();
 	}
@@ -124,7 +166,7 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 
 	glGenBuffers(1, &tbo);
 	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
-	glBufferData(GL_TEXTURE_BUFFER, vertex_count * SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT * sizeof(glm::vec3), transfer_coeffs, GL_STATIC_DRAW);
+	glBufferData(GL_TEXTURE_BUFFER, vertex_count * transfer_coeff_count * sizeof(glm::vec3), transfer_coeffs, GL_STATIC_DRAW);
 
 	glGenTextures(1, &tbo_tex);
 	glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
@@ -132,8 +174,6 @@ void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[])
 
 	delete[] vertices;
 	delete[] transfer_coeffs;
-	
-	delete[] dat_file_name;
 }
 
 bool Mesh::intersects(const Ray& ray) const {
@@ -172,6 +212,8 @@ Triangle* Mesh::closest_triangle(const Ray& ray) const {
 }
 
 void Mesh::render() const {
+	shader.bind();
+
 	// Bind TBO
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
