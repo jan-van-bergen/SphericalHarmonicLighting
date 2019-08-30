@@ -2,7 +2,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Shader.h"
-#include "SphericalSamples.h"
+#include "SphericalHarmonics.h"
 
 // Base class that provides the abstraction to differentiate between Diffuse and Glossy materials
 class MeshShader : public Shader {

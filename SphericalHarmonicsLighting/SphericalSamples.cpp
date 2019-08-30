@@ -1,4 +1,4 @@
-#include "SphericalSamples.h"
+#include "SphericalHarmonics.h"
 
 #include <random>
 

@@ -1,6 +1,6 @@
 #include "SHRotation.h"
 
-#include "SphericalSamples.h"
+#include "SphericalHarmonics.h"
 
 /*
 	Rotation matrix recurrence relation based on the 1996 paper 
@@ -48,12 +48,12 @@ private:
 
 // Formula for the size of the precalulated arrays for u,v,w
 // Derivd by expanding the summation: \sum_{l=0}^{b-1} (2l+1) (2l+1)
-#define SH_COUNT (2*SH_NUM_BANDS * (SH_NUM_BANDS - 1) * (2*SH_NUM_BANDS - 1)) / 3 + 2*SH_NUM_BANDS*SH_NUM_BANDS - SH_NUM_BANDS
+#define SH_ARRAY_COUNT (2*SH_NUM_BANDS * (SH_NUM_BANDS - 1) * (2*SH_NUM_BANDS - 1)) / 3 + 2*SH_NUM_BANDS*SH_NUM_BANDS - SH_NUM_BANDS
 
 // Precalculated arrays to avoid having to calculate the u,v,w functions every time
-float u_array[SH_COUNT];
-float v_array[SH_COUNT];
-float w_array[SH_COUNT];
+float u_array[SH_ARRAY_COUNT];
+float v_array[SH_ARRAY_COUNT];
+float w_array[SH_ARRAY_COUNT];
 
 float u(int l, int m, int n) {
 	if (abs(n) < l) {

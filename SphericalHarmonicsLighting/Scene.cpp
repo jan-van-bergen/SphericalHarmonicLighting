@@ -7,7 +7,6 @@
 #include "VectorMath.h"
 
 #include "SHRotation.h"
-#include "SphericalSamples.h"
 
 #include "ScopedTimer.h"
 

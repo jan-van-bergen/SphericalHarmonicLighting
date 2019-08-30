@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 
-#include "SphericalSamples.h"
+#include "SphericalHarmonics.h"
 
 class Light {
 public:

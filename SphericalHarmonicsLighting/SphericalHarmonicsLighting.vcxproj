@@ -191,7 +191,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SHRotation.h" />
-    <ClInclude Include="SphericalSamples.h" />
+    <ClInclude Include="SphericalHarmonics.h" />
     <ClInclude Include="ScopedTimer.h" />
     <ClInclude Include="String.h" />
     <ClInclude Include="Types.h" />
@@ -200,15 +200,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetLoader.cpp" />
+    <ClCompile Include="DiffuseShader.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="Display.cpp" />
+    <ClCompile Include="GlossyShader.cpp" />
     <ClCompile Include="HDRProbeLight.cpp" />
     <ClCompile Include="KDNodeDebugger.cpp" />
     <ClCompile Include="KDTree.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="MeshShaders.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SHRotation.cpp" />
