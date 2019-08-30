@@ -5,7 +5,7 @@
 #include "Types.h"
 #include "Util.h"
 
-#include "String.h"
+#include "StringHelper.h"
 #include "ChunkBuffer.h"
 
 #include "ScopedTimer.h"
@@ -150,7 +150,7 @@ void load_shader_source(const char * path, const char * filename, ChunkBuffer<ch
 
 	while (true) {
 		// Try to find the string "#include" in the source str, break if no more occurences
-		int pos = first_index_of(include, str, start);
+		int pos = StringHelper::first_index_of(include, str, start);
 		if (pos == -1) break;
 
 		// Copy from start to pos
@@ -171,7 +171,7 @@ void load_shader_source(const char * path, const char * filename, ChunkBuffer<ch
 			int include_filename_length = end - pos - 1;
 			assert(path_length + include_filename_length < 1024); // Assert that it fits in the char buffer
 
-			substr(include_filename_full + path_length, str, pos + 1, include_filename_length);
+			StringHelper::substr(include_filename_full + path_length, str, pos + 1, include_filename_length);
 
 			// Recurse in case the included file includes another file
 			load_shader_source(path, include_filename_full, source, defines);
@@ -202,7 +202,7 @@ GLuint Shader::load_shader(const char* filename, GLuint shader_type, const Defin
 	while (filename[filename_without_path] != '/') filename_without_path--;
 
 	char path[1024];
-	substr(path, filename, 0, filename_without_path + 1);
+	StringHelper::substr(path, filename, 0, filename_without_path + 1);
 
 	// Load shader source recursively
 	load_shader_source(path, filename, source, defines);

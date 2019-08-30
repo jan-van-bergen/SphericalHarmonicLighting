@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-#include "String.h"
+#include "StringHelper.h"
 
 #include "Util.h"
 #include "ScopedTimer.h"
@@ -44,7 +44,7 @@ void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]
 	u32 file_name_length = strlen(file_name);
 	strcpy_s(transfer_coeffs_file_name, file_name_length + 1, file_name);
 
-	int last_dot_index = last_index_of(".", transfer_coeffs_file_name);
+	int last_dot_index = StringHelper::last_index_of(".", transfer_coeffs_file_name);
 	assert(last_dot_index != INVALID);
 
 	int transfer_coeff_count = INVALID;

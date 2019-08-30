@@ -193,7 +193,7 @@
     <ClInclude Include="SHRotation.h" />
     <ClInclude Include="SphericalHarmonics.h" />
     <ClInclude Include="ScopedTimer.h" />
-    <ClInclude Include="String.h" />
+    <ClInclude Include="StringHelper.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="VectorMath.h" />
@@ -215,6 +215,7 @@
     <ClCompile Include="SHRotation.cpp" />
     <ClCompile Include="SphericalSamples.cpp" />
     <ClCompile Include="Ray.cpp" />
+    <ClCompile Include="StringHelper.cpp" />
     <ClCompile Include="VectorMath.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

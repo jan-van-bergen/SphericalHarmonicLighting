@@ -10,7 +10,7 @@ private:
 public:
 	inline ChunkBuffer() {
 		count = 0;
-		next  = NULL;
+		next  = nullptr;
 	}
 
 	inline ~ChunkBuffer() {
