@@ -90,7 +90,7 @@ float K(int l, int m) {
 // m in the range [-l..l]
 // theta in the range [0..Pi]
 // phi in the range [0..2*Pi]
-float SH(int l, int m, float theta, float phi) {
+float evaluate(int l, int m, float theta, float phi) {
 	if (m == 0) {
 		return K(l, 0) * P(l, m, cos(theta));
 	} else if(m > 0) {
@@ -101,7 +101,7 @@ float SH(int l, int m, float theta, float phi) {
 } 
 
 // Fills an N*N array with uniformly distributed SH samples across the unit sphere, using jittered stratification
-void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands) {
+void SH::init_samples(Sample samples[], int sqrt_n_samples, int n_bands) {
 	const float inv_sqrt_n_samples = 1.0f / sqrt_n_samples;
 
 	std::random_device random_device;
@@ -130,7 +130,7 @@ void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands) {
 			// Precompute all SH coefficients for this sample
 			for (int l = 0; l < n_bands; l++) {
 				for (int m = -l; m <= l; m++) {
-					samples[index].coeffs[SH_INDEX(l, m)] = SH(l, m, theta, phi);
+					samples[index].coeffs[SH_INDEX(l, m)] = evaluate(l, m, theta, phi);
 				}
 			}
 		}
@@ -139,7 +139,7 @@ void init_samples(SH_Sample samples[], int sqrt_n_samples, int n_bands) {
 
 // Projects a given polar function into Spherical Harmonic coefficients.
 // This is done using Monte Carlo integration, using the samples provided in the samples array
-void project_polar_function(PolarFunction polar_function, int n_samples, const SH_Sample samples[], glm::vec3 result[]) {
+void SH::project_polar_function(PolarFunction polar_function, int n_samples, const Sample samples[], glm::vec3 result[]) {
 	// For each sample
 	for (int i = 0; i < n_samples; i++) {
 		float theta = samples[i].theta;
@@ -159,7 +159,7 @@ void project_polar_function(PolarFunction polar_function, int n_samples, const S
 }
 
 // Formula from "An Efficient Representation for Irradiance Environment Maps" by Ramamoorthi and Hanrahan
-void calc_phong_lobe_coeffs(float result[SH_NUM_BANDS]) {
+void SH::calc_phong_lobe_coeffs(float result[SH_NUM_BANDS]) {
 	assert(SH_NUM_BANDS > 0);
 
 	result[0] = PI;

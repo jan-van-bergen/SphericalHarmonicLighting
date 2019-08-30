@@ -31,7 +31,7 @@ Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_nam
 	}
 }
 
-void Mesh::init(const Scene& scene, int sample_count, const SH_Sample samples[]) {
+void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]) {
 	const int vertex_count = mesh_data->vertex_count;
 	const int index_count  = mesh_data->index_count;
 

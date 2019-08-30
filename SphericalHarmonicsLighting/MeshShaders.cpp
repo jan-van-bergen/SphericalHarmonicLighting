@@ -31,7 +31,7 @@ GlossyShader::GlossyShader() :
 	uni_camera_position  (get_uniform("camera_position"))
 	{ 
 		float phong_lobe_coeffs[SH_NUM_BANDS];
-		calc_phong_lobe_coeffs(phong_lobe_coeffs);
+		SH::calc_phong_lobe_coeffs(phong_lobe_coeffs);
 
 		bind();
 		{

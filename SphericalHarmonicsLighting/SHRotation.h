@@ -1,6 +1,8 @@
 #pragma once
 #include <glm/gtc/quaternion.hpp>
 
-void sh_init_rotation();
+namespace SH {
+	void init_rotation();
 
-void sh_rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 coeffs_out[]);
+	void rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 coeffs_out[]);
+}

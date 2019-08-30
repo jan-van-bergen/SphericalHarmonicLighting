@@ -44,7 +44,7 @@ public:
 
 	Mesh(const char* file_name, const MeshShader& shader);
 
-	void init(const Scene& scene, int sample_count, const SH_Sample samples[]);
+	void init(const Scene& scene, int sample_count, const SH::Sample samples[]);
 	
 	bool       intersects      (const Ray& ray) const;
 	Triangle * closest_triangle(const Ray& ray) const;

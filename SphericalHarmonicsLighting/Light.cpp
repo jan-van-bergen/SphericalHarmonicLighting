@@ -2,7 +2,7 @@
 
 #include "Util.h"
 
-void Light::init(int sample_count, const SH_Sample samples[]) {
+void Light::init(int sample_count, const SH::Sample samples[]) {
 	// Weighed by the area of a 3D unit sphere
 	const float weight = 4.0f * PI;
 

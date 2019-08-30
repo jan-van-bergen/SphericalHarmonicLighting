@@ -37,10 +37,10 @@ Scene::~Scene() {
 }
 
 void Scene::init() {
-	sh_init_rotation();
+	SH::init_rotation();
 
-	SH_Sample* samples = new SH_Sample[SAMPLE_COUNT];
-	init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
+	SH::Sample* samples = new SH::Sample[SAMPLE_COUNT];
+	SH::init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
 
 	{
 		ScopedTimer timer("KD Tree Construction");
@@ -105,7 +105,7 @@ void Scene::update(float delta, const u8* keys) {
 	angle = fmod(angle + delta, 2.0f * PI);
 
 	glm::vec3 light_coeffs_rotated[SH_COEFFICIENT_COUNT];
-	sh_rotate(glm::angleAxis(angle, glm::vec3(0.0f, 1.0f, 0.0f)), lights[0]->coefficients, light_coeffs_rotated);
+	SH::rotate(glm::angleAxis(angle, glm::vec3(0.0f, 1.0f, 0.0f)), lights[0]->coefficients, light_coeffs_rotated);
 
 	shader_diffuse.bind();
 	shader_diffuse.set_light_coeffs(light_coeffs_rotated);

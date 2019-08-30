@@ -148,7 +148,7 @@ float W(const Matrix& R, const Matrix& prev_M, int l, int m, int n) {
 	}
 }
 
-void sh_init_rotation() {
+void SH::init_rotation() {
 	int index = 1;
 
 	for (int l = 1; l < SH_NUM_BANDS; l++) {
@@ -164,7 +164,7 @@ void sh_init_rotation() {
 	}
 }
 
-void sh_rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 coeffs_out[]) {
+void SH::rotate(const glm::quat& rotation, const glm::vec3 coeffs_in[], glm::vec3 coeffs_out[]) {
 	// Make sure the input and ouput arrays are not the same memory location
 	assert(coeffs_in != coeffs_out);
 

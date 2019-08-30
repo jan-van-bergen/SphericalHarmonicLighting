@@ -102,7 +102,7 @@ float K(int l, int m) {
 // m in the range [-l..l]
 // theta in the range [0..Pi]
 // phi in the range [0..2*Pi]
-float SH(int l, int m, float theta, float phi) {
+float evaluate(int l, int m, float theta, float phi) {
 	if (m == 0) {
 		return K(l, 0) * P(l, m, cos(theta));
 	} else if(m > 0) {
@@ -149,7 +149,7 @@ void main() {
 	int index = 0;
 	for (int l = 0; l < SH_NUM_BANDS; l++) {
 		for (int m = -l; m <= l; m++) {
-			colour += phong_lobe_coeffs[l] * transfer_coeffs[index++] * SH(l, m, R_theta, R_phi);
+			colour += phong_lobe_coeffs[l] * transfer_coeffs[index++] * evaluate(l, m, R_theta, R_phi);
 		}
 	}
 
