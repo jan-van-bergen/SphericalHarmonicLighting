@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include "String.h"
+
 #include "Util.h"
 #include "ScopedTimer.h"
 
@@ -42,14 +44,17 @@ void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]
 	u32 file_name_length = strlen(file_name);
 	strcpy_s(transfer_coeffs_file_name, file_name_length + 1, file_name);
 
-	int transfer_coeff_count = -1;
+	int last_dot_index = last_index_of(".", transfer_coeffs_file_name);
+	assert(last_dot_index != INVALID);
+
+	int transfer_coeff_count = INVALID;
 	switch (material.shader.type) {
 		case MeshShader::Type::DIFFUSE: {
 			// For diffuse transfer functions we use a SH_COEFFICIENT_COUNT dimensional vector
 			transfer_coeff_count = SH_COEFFICIENT_COUNT;
 
 			const char * diffuse_str = "_diffuse.dat";
-			strcpy_s(transfer_coeffs_file_name + file_name_length - 4, strlen(diffuse_str) + 1, diffuse_str);
+			strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(diffuse_str) + 1, diffuse_str);
 		} break;
 
 		case MeshShader::Type::GLOSSY: {
@@ -57,8 +62,10 @@ void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]
 			transfer_coeff_count = SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT;
 
 			const char * glossy_str = "_glossy.dat";
-			strcpy_s(transfer_coeffs_file_name + file_name_length - 4, strlen(glossy_str) + 1, glossy_str);
+			strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(glossy_str) + 1, glossy_str);
 		} break;
+
+		default: abort();
 	}
 	glm::vec3 * transfer_coeffs = new glm::vec3[vertex_count * transfer_coeff_count];
 
@@ -201,7 +208,6 @@ void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]
 			material.brdf_coeffs[l] = sqrt(4.0f * PI / (2.0f * l + 1.0f)) * brdf_coeffs_full[l*(l + 1)];
 		}
 	}
-
 }
 
 bool Mesh::intersects(const Ray& ray) const {
@@ -223,9 +229,9 @@ bool Mesh::intersects(const Ray& ray) const {
 	return result;
 }
 
-Triangle* Mesh::closest_triangle(const Ray& ray) const {
-	float     min_distance = INFINITY;
-	Triangle* closest_triangle = NULL;
+Triangle * Mesh::closest_triangle(const Ray& ray) const {
+	float      min_distance = INFINITY;
+	Triangle * closest_triangle = NULL;
 
 	for (int i = 0; i < triangle_count; i++) {
 		float distance = ray.distance(triangles[i]);

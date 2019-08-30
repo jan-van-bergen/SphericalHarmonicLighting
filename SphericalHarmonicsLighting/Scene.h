@@ -14,7 +14,7 @@
 #include "MeshShaders.h"
 
 #define SQRT_SAMPLE_COUNT 50
-#define SAMPLE_COUNT      (SQRT_SAMPLE_COUNT * SQRT_SAMPLE_COUNT)
+#define SAMPLE_COUNT (SQRT_SAMPLE_COUNT * SQRT_SAMPLE_COUNT)
 
 struct Material {
 	const MeshShader& shader;
@@ -92,4 +92,3 @@ private:
 
 	float angle;
 };
-

@@ -150,7 +150,7 @@ void load_shader_source(const char * path, const char * filename, ChunkBuffer<ch
 
 	while (true) {
 		// Try to find the string "#include" in the source str, break if no more occurences
-		int pos = index_of(include, str, start);
+		int pos = first_index_of(include, str, start);
 		if (pos == -1) break;
 
 		// Copy from start to pos

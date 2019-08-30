@@ -21,7 +21,7 @@ public:
 	inline int size() const {
 		int full_chunk_count = 0;
 
-		const ChunkBuffer<T, ChunkSize>* buffer = this;
+		const ChunkBuffer<T, ChunkSize> * buffer = this;
 
 		while (buffer->next) {
 			full_chunk_count++;
@@ -34,7 +34,7 @@ public:
 
 	// Adds a new item to the linked list of Chunks
 	inline void add(const T& item) {
-		ChunkBuffer<T, ChunkSize>* buffer = this;
+		ChunkBuffer<T, ChunkSize> * buffer = this;
 
 		// Iterate until we find the last Chunk in the linked list
 		while (buffer->next) buffer = buffer->next;
@@ -49,7 +49,7 @@ public:
 
 	// Adds an array of new items to the linked list of Chunks
 	inline void add(int items_length, const T items[]) {
-		ChunkBuffer<T, ChunkSize>* buffer = this;
+		ChunkBuffer<T, ChunkSize> * buffer = this;
 
 		// Iterate until we find the last Chunk in the linked list
 		while (buffer->next) buffer = buffer->next;
@@ -90,7 +90,7 @@ public:
 
 	// Copy into Chunk Buffer as if it were contiguous memory
 	inline void copy_in(const T* src, int start_index, int length) {
-		ChunkBuffer<T, ChunkSize>* buffer = this;
+		ChunkBuffer<T, ChunkSize> * buffer = this;
 
 		// Iterate over the linked list of Chunks until we find the one that contains the start index
 		while (start_index >= ChunkSize) {
@@ -132,7 +132,7 @@ public:
 
 	// Copy out of ChunkBuffer as if it were contiguous memory
 	inline void copy_out(T* dst, int start_index, int length) const {
-		const ChunkBuffer<T, ChunkSize>* buffer = this;
+		const ChunkBuffer<T, ChunkSize> * buffer = this;
 
 		// Iterate over the linked list of Chunks until we find the one that contains the start index
 		while (start_index >= ChunkSize) {
@@ -172,7 +172,7 @@ public:
 	}
 
 	inline T& operator[](int index) const {
-		ChunkBuffer<T, ChunkSize>* buffer = this;
+		ChunkBuffer<T, ChunkSize> * buffer = this;
 
 		while (index >= ChunkSize) {
 			index -= ChunkSize;
