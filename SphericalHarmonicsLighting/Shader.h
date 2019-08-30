@@ -28,7 +28,7 @@ public:
 		return glGetUniformLocation(program_id, name);
 	}
 
-	static void unbind() {
+	inline void unbind() const {
 		glUseProgram(0);
 	}
 

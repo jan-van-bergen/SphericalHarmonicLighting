@@ -53,11 +53,15 @@ class GlossyShader : public MeshShader {
 public:
 	GlossyShader();
 
+	inline void set_brdf_coeffs(const glm::vec3 coeffs[SH_NUM_BANDS]) const {
+		glUniform3fv(uni_brdf_coeffs, SH_NUM_BANDS, reinterpret_cast<const GLfloat*>(coeffs));
+	}
+
 	inline void set_camera_position(const glm::vec3& camera_position) const {
 		glUniform3f(uni_camera_position, camera_position.x, camera_position.y, camera_position.z);
 	}
 
 private:
-	const GLuint uni_phong_lobe_coeffs;
+	const GLuint uni_brdf_coeffs;
 	const GLuint uni_camera_position;
 };

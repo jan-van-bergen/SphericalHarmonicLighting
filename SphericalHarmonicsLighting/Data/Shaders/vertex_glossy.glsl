@@ -11,8 +11,8 @@ layout (location = 0) out vec3 colour_out;
 
 uniform samplerBuffer tbo_texture;
 
-uniform vec3  light_coeffs[SH_COEFFICIENT_COUNT];
-uniform float phong_lobe_coeffs[SH_NUM_BANDS];
+uniform vec3 light_coeffs[SH_COEFFICIENT_COUNT];
+uniform vec3 brdf_coeffs [SH_NUM_BANDS];
 
 uniform vec3 camera_position;
 uniform mat4 view_projection;
@@ -149,7 +149,9 @@ void main() {
 	int index = 0;
 	for (int l = 0; l < SH_NUM_BANDS; l++) {
 		for (int m = -l; m <= l; m++) {
-			colour += phong_lobe_coeffs[l] * transfer_coeffs[index++] * evaluate(l, m, R_theta, R_phi);
+			colour += brdf_coeffs[l] * transfer_coeffs[index] * evaluate(l, m, R_theta, R_phi);
+			
+			index++;
 		}
 	}
 

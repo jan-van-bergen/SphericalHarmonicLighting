@@ -179,6 +179,29 @@ void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]
 
 	delete[] vertices;
 	delete[] transfer_coeffs;
+
+	if (material.shader.type == MeshShader::Type::GLOSSY) {	
+		SH::PolarFunction func = [](float theta, float phi) {
+			const float spec = 1.0f;
+
+			float dot = cos(theta);
+
+			if (dot >= 0.0f) return glm::vec3(pow(dot, spec));
+		
+			return glm::vec3(0.0f);
+		};
+
+		glm::vec3 brdf_coeffs_full[SH_COEFFICIENT_COUNT];
+		for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+			brdf_coeffs_full[i] = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
+		SH::project_polar_function(func, SAMPLE_COUNT, samples, brdf_coeffs_full);
+
+		for (int l = 0; l < SH_NUM_BANDS; l++) {
+			material.brdf_coeffs[l] = sqrt(4.0f * PI / (2.0f * l + 1.0f)) * brdf_coeffs_full[l*(l + 1)];
+		}
+	}
+
 }
 
 bool Mesh::intersects(const Ray& ray) const {
@@ -218,6 +241,10 @@ Triangle* Mesh::closest_triangle(const Ray& ray) const {
 
 void Mesh::render() const {
 	material.shader.bind();
+
+	if (material.shader.type == MeshShader::Type::GLOSSY) {	
+		static_cast<const GlossyShader&>(material.shader).set_brdf_coeffs(material.brdf_coeffs);
+	}
 
 	// Bind TBO
 	glActiveTexture(GL_TEXTURE0);
