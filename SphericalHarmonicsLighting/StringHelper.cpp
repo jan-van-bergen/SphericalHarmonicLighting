@@ -1,10 +1,11 @@
-#pragma once
+#include "StringHelper.h"
+
 #include <cstring>
 
 // Finds the index of the first occurence of needle in haystack
 // Searching begins at the given start index and moves forward through the string
 // Returns -1 when no match is found
-inline int first_index_of(const char * needle, const char * haystack, int start = 0) {
+int StringHelper::first_index_of(const char * needle, const char * haystack, int start) {
 	int index = start;
 
 	// Iterate over the haystack while index < length of the string
@@ -32,7 +33,7 @@ inline int first_index_of(const char * needle, const char * haystack, int start 
 // Searching begins at the given start index and moves backward through the string
 // Default start index = -1, which makes the search start at strlen(haystack) - strlen(needle)
 // Returns -1 when no match is found
-inline int last_index_of(const char * needle, const char * haystack, int start = -1) {
+int StringHelper::last_index_of(const char * needle, const char * haystack, int start) {
 	if (start == -1) {
 		start = strlen(haystack) - strlen(needle);
 	}
@@ -61,7 +62,7 @@ inline int last_index_of(const char * needle, const char * haystack, int start =
 }
 
 // Memcopies length chars from src + start to dst, then null terminates the dst string
-inline void substr(char * dst, const char * src, int start, int length) {
+void StringHelper::substr(char * dst, const char * src, int start, int length) {
 	memcpy(dst, src + start, length);
 	dst[length] = NULL;
 }
