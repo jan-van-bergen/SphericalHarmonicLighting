@@ -2,27 +2,51 @@
 
 #include <cstring>
 
+bool StringHelper::starts_with(const char * str, const char * start_str) {
+	int start_index = 0;
+
+	// Iterate while str and start_str are the same
+	while (str[start_index] == start_str[start_index]) {
+		start_index++;
+
+		// If we manage to reach the end of the start_str it was matched succesfully
+		if (start_str[start_index] == NULL) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool StringHelper::contains(const char * needle, const char * haystack){
+	int haystack_index = 0;
+
+	// Iterate over the haystack while index < length of the string
+	while (haystack[haystack_index] != NULL) {
+		if (starts_with(haystack + haystack_index, needle)) {
+			return true;
+		}
+
+		haystack_index++;
+	}
+
+	// No match was found
+	return false;
+}
+
 // Finds the index of the first occurence of needle in haystack
 // Searching begins at the given start index and moves forward through the string
 // Returns -1 when no match is found
 int StringHelper::first_index_of(const char * needle, const char * haystack, int start) {
-	int index = start;
+	int haystack_index = start;
 
 	// Iterate over the haystack while index < length of the string
-	while (haystack[index] != NULL) {
-		int i = 0;
-
-		// Iterate while needle and haystack are the same
-		while (haystack[index + i] == needle[i]) {
-			i++;
-
-			// If we manage to reach the end of the needle it was matched succesfully
-			if (needle[i] == NULL) {
-				return index;
-			}
+	while (haystack[haystack_index] != NULL) {
+		if (starts_with(haystack + haystack_index, needle)) {
+			return haystack_index;
 		}
 
-		index++;
+		haystack_index++;
 	}
 
 	// Return -1 if no match was found
@@ -38,23 +62,15 @@ int StringHelper::last_index_of(const char * needle, const char * haystack, int 
 		start = strlen(haystack) - strlen(needle);
 	}
 
-	int index = start;
+	int haystack_index = start;
 	
 	// Iterate over the haystack while index < length of the string
-	while (index >= 0) {
-		int i = 0;
-
-		// Iterate while needle and haystack are the same
-		while (haystack[index + i] == needle[i]) {
-			i++;
-
-			// If we manage to reach the end of the needle it was matched succesfully
-			if (needle[i] == NULL) {
-				return index;
-			}
+	while (haystack_index >= 0) {
+		if (starts_with(haystack + haystack_index, needle)) {
+			return haystack_index;
 		}
 
-		index--;
+		haystack_index--;
 	}
 
 	// Return -1 if no match was found
@@ -90,4 +106,28 @@ int StringHelper::split(const char * str, char split_char, ChunkBuffer<char>& re
 	result.add(NULL);
 
 	return count;
+}
+
+void StringHelper::to_lower(char * str) {
+	int index = 0;
+
+	while (str[index] != NULL) {
+		if (str[index] >= 'A' && str[index] <= 'Z') {
+			str[index] += 'a' - 'A';
+		}
+
+		index++;
+ 	}
+}
+
+void StringHelper::to_upper(char * str) {
+	int index = 0;
+
+	while (str[index] != NULL) {
+		if (str[index] >= 'a' && str[index] <= 'z') {
+			str[index] += 'A' - 'a';
+		}
+
+		index++;
+ 	}
 }

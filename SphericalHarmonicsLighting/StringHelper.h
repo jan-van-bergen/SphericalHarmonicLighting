@@ -2,6 +2,10 @@
 #include "ChunkBuffer.h"
 
 namespace StringHelper {
+	bool starts_with(const char * str, const char * start_str);
+
+	bool contains(const char * needle, const char * haystack);
+
 	// Finds the index of the first occurence of needle in haystack
 	// Searching begins at the given start index and moves forward through the string
 	// Returns -1 when no match is found
@@ -20,4 +24,19 @@ namespace StringHelper {
 	// The result is stored in a ChunkBuffer of chars, where every substring is null-terminated.
 	// The returned integer is the amount of splitted substrings
 	int split(const char * str, char split_char, ChunkBuffer<char>& result);
+
+	inline bool is_ascii_digit(char c) {
+		return c >= '0' && c <= '9';
+	}
+
+	inline bool is_ascii_alphabetical(char c) {
+		return (c >= 'A' && c <= 'Z')
+			|| (c >= 'a' && c <= 'z');
+	}
+
+	// Converts ASCII characters in str to lower case
+	void to_lower(char * str);
+
+	// Converts ASCII characters in str to upper case
+	void to_upper(char * str);
 }
