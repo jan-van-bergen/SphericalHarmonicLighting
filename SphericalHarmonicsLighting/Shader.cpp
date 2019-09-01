@@ -92,11 +92,11 @@ void replace_defines_and_add(ChunkBuffer<char>& source, int length, const char *
 					// If the match held until the end of the define name
 					if (defines.names[j][k] == NULL) {
 						// Copy up until where the current define name starts
-						source.add(i - start, src + start);
+						source.add(src + start, i - start);
 
 						// Copy the define definition in stead of the name
 						int definition_length = strlen(defines.definitions[j]);
-						source.add(definition_length, defines.definitions[j]);
+						source.add(defines.definitions[j], definition_length);
 
 						// Mark the fact that we have copied up to i + k,
 						// so that next time we copy we start at this index
@@ -113,7 +113,7 @@ void replace_defines_and_add(ChunkBuffer<char>& source, int length, const char *
 	}
 
 	// Copy the remaining part of src
-	source.add(length - start, src + start);
+	source.add(src + start, length - start);
 }
 
 // Recursively loads shader source file using the #include directive

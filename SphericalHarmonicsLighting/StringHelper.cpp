@@ -66,3 +66,28 @@ void StringHelper::substr(char * dst, const char * src, int start, int length) {
 	memcpy(dst, src + start, length);
 	dst[length] = NULL;
 }
+
+int StringHelper::split(const char * str, char split_char, ChunkBuffer<char>& result) {
+	int index = 0;
+	int index_after_last_split = 0;
+
+	int count = 1;
+
+	while (str[index] != NULL) {
+		if (str[index] == split_char) {
+			result.add(str + index_after_last_split, index - index_after_last_split);
+			result.add(NULL);
+
+			index_after_last_split = index + 1;
+
+			count++;
+		}
+
+		index++;
+	}
+
+	result.add(str + index_after_last_split, index - index_after_last_split);
+	result.add(NULL);
+
+	return count;
+}

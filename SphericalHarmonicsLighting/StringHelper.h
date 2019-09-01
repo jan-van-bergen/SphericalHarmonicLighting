@@ -15,4 +15,9 @@ namespace StringHelper {
 
 	// Memcopies length chars from src + start to dst, then null terminates the dst string
 	void substr(char * dst, const char * src, int start, int length);
+	
+	// Splits the given input string str on the given split char
+	// The result is stored in a ChunkBuffer of chars, where every substring is null-terminated.
+	// The returned integer is the amount of splitted substrings
+	int split(const char * str, char split_char, ChunkBuffer<char>& result);
 }

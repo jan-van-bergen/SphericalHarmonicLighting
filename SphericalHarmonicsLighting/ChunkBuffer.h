@@ -1,4 +1,6 @@
 #pragma once
+#include <cassert>
+#include <cstring>
 
 template<typename T, int ChunkSize = 4096>
 struct ChunkBuffer {
@@ -48,7 +50,7 @@ public:
 	}
 
 	// Adds an array of new items to the linked list of Chunks
-	inline void add(int items_length, const T items[]) {
+	inline void add(const T items[], int items_length) {
 		ChunkBuffer<T, ChunkSize> * buffer = this;
 
 		// Iterate until we find the last Chunk in the linked list
@@ -89,6 +91,7 @@ public:
 	}
 
 	// Copy into Chunk Buffer as if it were contiguous memory
+	// start_index refers to start index in the Chunk Buffer, not in the input array
 	inline void copy_in(const T* src, int start_index, int length) {
 		ChunkBuffer<T, ChunkSize> * buffer = this;
 
