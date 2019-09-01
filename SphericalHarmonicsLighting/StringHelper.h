@@ -25,15 +25,6 @@ namespace StringHelper {
 	// The returned integer is the amount of splitted substrings
 	int split(const char * str, char split_char, ChunkBuffer<char>& result);
 
-	inline bool is_ascii_digit(char c) {
-		return c >= '0' && c <= '9';
-	}
-
-	inline bool is_ascii_alphabetical(char c) {
-		return (c >= 'A' && c <= 'Z')
-			|| (c >= 'a' && c <= 'z');
-	}
-
 	// Converts ASCII characters in str to lower case
 	void to_lower(char * str);
 
