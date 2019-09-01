@@ -32,6 +32,9 @@ struct Mesh {
 private:
 	const char* file_name;
 	const AssetLoader::MeshData* mesh_data;
+	
+	KD_Node *        kd_tree;
+	KD_Node_Debugger kd_tree_debugger;
 
 	GLuint vbo;
 	GLuint ibo;
@@ -52,6 +55,8 @@ public:
 	Triangle * closest_triangle(const Ray& ray) const;
 
 	void render() const;
+
+	void debug() const;
 };
 
 struct Camera {
@@ -66,7 +71,6 @@ class Scene
 {
 public:
 	Scene();
-	~Scene();
 
 	void init();
 
@@ -81,9 +85,6 @@ public:
 private:
 	const DiffuseShader shader_diffuse;
 	const GlossyShader  shader_glossy;
-
-	KD_Node *        kd_tree;
-	KD_Node_Debugger kd_tree_debugger;
 
 	Array<Mesh>   meshes;
 	Array<Light*> lights;

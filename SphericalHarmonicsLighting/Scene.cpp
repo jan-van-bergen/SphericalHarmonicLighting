@@ -27,12 +27,6 @@ Scene::Scene() : shader_diffuse(), shader_glossy(), angle(0) {
 	camera.position    = glm::vec3(0.0f, 0.0f, 10.0f);
 	camera.orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	camera.projection  = glm::perspective(DEG_TO_RAD(45.0f), 1600.0f / 900.0f, 0.1f, 100.0f);
-	
-	kd_tree = nullptr;
-}
-
-Scene::~Scene() {
-	if (kd_tree) delete kd_tree;
 }
 
 void Scene::init() {
@@ -40,32 +34,6 @@ void Scene::init() {
 
 	SH::Sample* samples = new SH::Sample[SAMPLE_COUNT];
 	SH::init_samples(samples, SQRT_SAMPLE_COUNT, SH_NUM_BANDS);
-
-	{
-		ScopedTimer timer("KD Tree Construction");
-
-		int total_triangle_count = 0;
-		for (int i = 0; i < meshes.size(); i++) {
-			total_triangle_count += meshes[i].triangle_count;
-		}
-
-		Triangle const ** total_triangles = new Triangle const *[total_triangle_count];
-
-		int offset = 0;
-		for (int i = 0; i < meshes.size(); i++) {
-			for (int j = 0; j < meshes[i].triangle_count; j++) {
-				total_triangles[offset + j] = meshes[i].triangles + j;
-			}
-
-			offset += meshes[i].triangle_count;
-		}
-
-		kd_tree = KD_Node::build(total_triangle_count, total_triangles);
-
-		delete[] total_triangles;
-	}
-
-	kd_tree_debugger.init(kd_tree);
 
 	for (int i = 0; i < meshes.size(); i++) {
 		meshes[i].init(*this, SAMPLE_COUNT, samples);
@@ -126,9 +94,17 @@ void Scene::render() const {
 void Scene::debug(GLuint uni_debug_view_projection) const {
 	glUniformMatrix4fv(uni_debug_view_projection, 1, GL_FALSE, glm::value_ptr(camera.view_projection));
 
-	kd_tree_debugger.draw();
+	for (int i = 0; i < meshes.size(); i++) {
+		meshes[i].debug();
+	}
 }
 
 bool Scene::intersects(const Ray& ray) const {
-	return kd_tree->intersects(ray);
+	for (int i = 0; i < meshes.size(); i++) {
+		if (meshes[i].intersects(ray)) {
+			return true;
+		}
+	}
+
+	return false;
 }

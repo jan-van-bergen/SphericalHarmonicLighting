@@ -32,6 +32,23 @@ Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_nam
 		triangles[i].plane.normal   =  glm::normalize(glm::cross(edge0, edge1));
 		triangles[i].plane.distance = -glm::dot(triangles[i].plane.normal, triangles[i].vertices[0]);
 	}
+	
+	{
+		ScopedTimer timer("KD Tree Construction");
+
+		Triangle const ** triangles_copy = new Triangle const *[triangle_count];
+		{
+			for (int i = 0; i < triangle_count; i++) {
+				triangles_copy[i] = &triangles[i];
+			}
+
+			kd_tree = KD_Node::build(triangle_count, triangles_copy);
+		}
+		delete[] triangles_copy;
+
+		kd_tree_debugger.init(kd_tree);
+	}
+
 }
 
 void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]) {
@@ -153,7 +170,7 @@ void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]
 				transfer_coeffs[v * transfer_coeff_count + i] *= normalization_factor;
 			}
 
-			printf("Vertex %u out of %u done\n", v, vertex_count);
+			//printf("Vertex %u out of %u done\n", v, vertex_count);
 		}
 
 		// Save the coefficients to a file so that they can be reloaded at a later time
@@ -212,22 +229,7 @@ void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]
 }
 
 bool Mesh::intersects(const Ray& ray) const {
-	// If any Triangle intersects the Ray then the Triangle Mesh intersects the Ray as well
-	bool result = false;
-
-	#pragma omp parallel for
-	for (int i = 0; i < triangle_count; i++) {
-		#pragma omp flush (result)
-		if (!result) {
-			if (ray.intersects(triangles[i])) {
-				result = true;
-				#pragma omp flush (result)
-			}
-		}
-	}
-
-	// If none of the Triangles intersect the nthe Triangle Mesh doesn't either
-	return result;
+	return kd_tree->intersects(ray);
 }
 
 Triangle * Mesh::closest_triangle(const Ray& ray) const {
@@ -269,4 +271,8 @@ void Mesh::render() const {
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
+}
+
+void Mesh::debug() const {
+	kd_tree_debugger.draw();
 }

@@ -69,10 +69,10 @@ KD_Node * KD_Node::build(int triangle_count, Triangle const * const triangles[])
 		return node;
 	}
 
-	glm::vec3  center(0.0f, 0.0f, 0.0f);
+	glm::vec3 center(0.0f, 0.0f, 0.0f);
 	// @PERFORMANCE: should be calculated only once and passed as an argument,
 	// instead of recalulcating at every depth level in the tree
-	glm::vec3* triangle_centers = new glm::vec3[triangle_count]; 
+	glm::vec3 * triangle_centers = new glm::vec3[triangle_count]; 
 
 	const float inv_triangle_count = 1.0f / (float)triangle_count;
 	
