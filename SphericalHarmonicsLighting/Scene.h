@@ -86,8 +86,11 @@ private:
 	const DiffuseShader shader_diffuse;
 	const GlossyShader  shader_glossy;
 
-	Array<Mesh>   meshes;
-	Array<Light*> lights;
+	Mesh * meshes;
+	int    mesh_count;
+
+	Light ** lights;
+	int      light_count;
 
 	Camera camera;
 

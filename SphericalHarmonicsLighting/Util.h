@@ -19,3 +19,5 @@
 // Macro indirection to allow #defines to be converted into strings
 #define _TO_STRING(value) #value
 #define TO_STRING(value) _TO_STRING(value)
+
+#define ALLOC_ARRAY(T, count) reinterpret_cast<T *>(malloc(count * sizeof(T)))

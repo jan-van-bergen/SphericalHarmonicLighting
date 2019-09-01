@@ -48,7 +48,6 @@ Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_nam
 
 		kd_tree_debugger.init(kd_tree);
 	}
-
 }
 
 void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]) {
@@ -186,27 +185,36 @@ void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]
 		out_file.close();
 	}
 
+	// Bind the vertices
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(Vertex), vertices, GL_STATIC_DRAW);
 
+	// Bind the indices
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(u32), mesh_data->indices, GL_STATIC_DRAW);
 
+	// Bind the transfer coefficients to a Texture Buffer Object (TBO)
 	glGenBuffers(1, &tbo);
 	glBindBuffer(GL_TEXTURE_BUFFER, tbo);
 	glBufferData(GL_TEXTURE_BUFFER, vertex_count * transfer_coeff_count * sizeof(glm::vec3), transfer_coeffs, GL_STATIC_DRAW);
 
+	// Attach the TBO to the TBO texture
 	glGenTextures(1, &tbo_tex);
 	glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, tbo);
 
+	// Afer uploading this data to the GPU it can be removed from CPU RAM
 	delete[] vertices;
 	delete[] transfer_coeffs;
 
+	// For GLOSSY materials, we need to convolve with a BRDF (Phong lobe)
+	// We compute this here and pass it to the Shader
 	if (material.shader.type == MeshShader::Type::GLOSSY) {	
-		SH::PolarFunction func = [](float theta, float phi) {
+		// Specular lobe function
+		// NOTE: This function depends only on theta, allowing for fast convolution with this kernel
+		SH::PolarFunction specular_lobe = [](float theta, float phi) {
 			const float spec = 1.0f;
 
 			float dot = cos(theta);
@@ -216,12 +224,15 @@ void Mesh::init(const Scene& scene, int sample_count, const SH::Sample samples[]
 			return glm::vec3(0.0f);
 		};
 
+		// Project the BRDF into Spherical Harmonic representation using Monte Carlo integration
 		glm::vec3 brdf_coeffs_full[SH_COEFFICIENT_COUNT];
 		for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 			brdf_coeffs_full[i] = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
-		SH::project_polar_function(func, SAMPLE_COUNT, samples, brdf_coeffs_full);
+		SH::project_polar_function(specular_lobe, SAMPLE_COUNT, samples, brdf_coeffs_full);
 
+		// Because the kernel is only dependend on theta, we can condense it into a representation with only 
+		// SH_NUM_BANDS coefficients instead of the normal SH_NUM_BANDS x SH_NUM_BANDS coefficients.
 		for (int l = 0; l < SH_NUM_BANDS; l++) {
 			material.brdf_coeffs[l] = sqrt(4.0f * PI / (2.0f * l + 1.0f)) * brdf_coeffs_full[l*(l + 1)];
 		}
