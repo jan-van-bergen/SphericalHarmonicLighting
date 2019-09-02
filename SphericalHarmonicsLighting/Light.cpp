@@ -2,12 +2,12 @@
 
 #include "Util.h"
 
-void Light::init(int sample_count, const SH::Sample samples[]) {
+void Light::init(const SH::Sample samples[SAMPLE_COUNT]) {
 	// Weighed by the area of a 3D unit sphere
 	const float weight = 4.0f * PI;
 
 	// For each sample
-	for (int i = 0; i < sample_count; i++) {
+	for (int i = 0; i < SAMPLE_COUNT; i++) {
 		float theta = samples[i].theta;
 		float phi   = samples[i].phi;
 
@@ -18,7 +18,7 @@ void Light::init(int sample_count, const SH::Sample samples[]) {
 	}
 
 	// Divide the result by weight and number of samples
-	const float factor = weight / sample_count;
+	const float factor = weight / SAMPLE_COUNT;
 	for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 		coefficients[i] *= factor;
 	}

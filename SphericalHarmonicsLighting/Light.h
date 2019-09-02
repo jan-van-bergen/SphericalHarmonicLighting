@@ -7,7 +7,7 @@ class Light {
 public:
 	glm::vec3 coefficients[SH_COEFFICIENT_COUNT];
 
-	void init(int sample_count, const SH::Sample samples[]);
+	void init(const SH::Sample samples[SAMPLE_COUNT]);
 
 	virtual glm::vec3 get_light(float theta, float phi) const = 0;
 };

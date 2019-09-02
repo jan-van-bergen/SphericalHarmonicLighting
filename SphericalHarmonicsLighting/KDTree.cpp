@@ -45,6 +45,58 @@ bool KD_Node::intersects(const Ray& ray) const {
 	return false;
 }
 
+float KD_Node::trace(const Ray& ray, int indices[3], float& u, float& v) const {
+	float min_distance = INFINITY;
+
+	if (ray.intersects(aabb)) {
+		if (left) { // If the left node pointer is non-null, we are not in a leaf node and need to recurse
+			assert(triangles == NULL);
+
+			int indices_left[3];
+			int indices_right[3];
+			float u_left, u_right;
+			float v_left, v_right;
+
+			float left_distance  = left->trace (ray, indices_left,  u_left,  v_left);
+			float right_distance = right->trace(ray, indices_right, u_right, v_right);
+
+			if (left_distance < right_distance) {
+				memcpy(indices, indices_left, 3 * sizeof(int));
+				u = u_left;
+				v = v_left;
+
+				return left_distance;
+			} else {
+				memcpy(indices, indices_right, 3 * sizeof(int));
+				u = u_right;
+				v = v_right;
+
+				return right_distance;
+			}
+		} else { // The current node is a leaf
+			assert(left  == NULL);
+			assert(right == NULL);
+
+			int   _indices[3];
+			float _u;
+			float _v;
+
+			for (int i = 0; i < triangle_count; i++) {
+				float distance = ray.trace(*triangles[i], _indices, _u, _v);
+				if (distance < min_distance) {
+					min_distance = distance;
+
+					memcpy(indices, _indices, 3 * sizeof(int));
+					u = _u;
+					v = _v;
+				}
+			}
+		}
+	}
+
+	return min_distance;
+}
+
 KD_Node * KD_Node::build(int triangle_count, Triangle const * const triangles[]) {
 	KD_Node * node = new KD_Node();
 	node->triangle_count = triangle_count;

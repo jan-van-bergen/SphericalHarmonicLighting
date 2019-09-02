@@ -13,8 +13,7 @@
 
 #include "MeshShaders.h"
 
-#define SQRT_SAMPLE_COUNT 50
-#define SAMPLE_COUNT (SQRT_SAMPLE_COUNT * SQRT_SAMPLE_COUNT)
+#define NUM_BOUNCES 3
 
 struct Material {
 	const MeshShader& shader;
@@ -30,29 +29,45 @@ class Scene; // Forward Declaration needed by Mesh
 
 struct Mesh {
 private:
-	const char* file_name;
-	const AssetLoader::MeshData* mesh_data;
+	const char * file_name;
+	const AssetLoader::MeshData * mesh_data;
 	
+	char * transfer_coeffs_file_name;
+
 	KD_Node *        kd_tree;
 	KD_Node_Debugger kd_tree_debugger;
-
+	
 	GLuint vbo;
 	GLuint ibo;
 	GLuint tbo;
 	GLuint tbo_tex;
 
+	bool * hits; // @TODO: OPTIMIZE!!!
+
 public:
 	int        triangle_count;
 	Triangle * triangles;
+	
+	int vertex_count;
+
+	glm::vec3 * transfer_coeffs;
+	int         transfer_coeff_count; // Either SH_COEFFICIENT_COUNT or SH_COEFFICIENT_COUNT^2, depending on DIFFUSE / GLOSSY Shader
 
 	Material material;
 
 	Mesh(const char* file_name, const MeshShader& shader);
 
-	void init(const Scene& scene, int sample_count, const SH::Sample samples[]);
+	//void init(const Scene& scene, int sample_count, const SH::Sample samples[]);
 	
-	bool       intersects      (const Ray& ray) const;
-	Triangle * closest_triangle(const Ray& ray) const;
+	bool try_to_load_transfer_coeffs();
+	void save_transfer_coeffs() const;
+
+	void init_light_direct(const Scene& scene, const SH::Sample[SAMPLE_COUNT]);
+	void init_light_bounce(const Scene& scene, const SH::Sample[SAMPLE_COUNT], const glm::vec3 previous_bounce_transfer_coeffs[], glm::vec3 bounce_transfer_coeffs[]);
+	void init_shader(const SH::Sample[SAMPLE_COUNT]);
+
+	bool  intersects(const Ray& ray) const;
+	float trace     (const Ray& ray, int indices[3], float& u, float& v) const;
 
 	void render() const;
 
@@ -71,6 +86,7 @@ class Scene
 {
 public:
 	Scene();
+	~Scene();
 
 	void init();
 
@@ -80,7 +96,8 @@ public:
 
 	void debug(GLuint uni_debug_view_projection) const;
 
-	bool intersects(const Ray& ray) const;
+	bool  intersects(const Ray& ray) const;
+	float trace     (const Ray& ray, int indices[3], float& u, float& v, glm::vec3& albedo) const;
 
 private:
 	const DiffuseShader shader_diffuse;
@@ -88,6 +105,8 @@ private:
 
 	Mesh * meshes;
 	int    mesh_count;
+
+	int * mesh_scene_coeff_offsets; // Array of mesh_count elements
 
 	Light ** lights;
 	int      light_count;

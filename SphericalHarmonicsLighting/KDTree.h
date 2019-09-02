@@ -18,7 +18,8 @@ public:
 	KD_Node();
 	~KD_Node();
 
-	bool intersects(const Ray& ray) const;
+	bool  intersects(const Ray& ray) const;
+	float trace     (const Ray& ray, int indices[3], float& u, float& v) const;
 
 	static KD_Node* build(int triangle_count, Triangle const * const triangles[]);
 };

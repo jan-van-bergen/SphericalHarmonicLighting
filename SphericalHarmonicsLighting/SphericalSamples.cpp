@@ -100,16 +100,16 @@ float evaluate(int l, int m, float theta, float phi) {
 	}
 } 
 
-// Fills an N*N array with uniformly distributed SH samples across the unit sphere, using jittered stratification
-void SH::init_samples(Sample samples[], int sqrt_n_samples, int n_bands) {
-	const float inv_sqrt_n_samples = 1.0f / sqrt_n_samples;
+// Fills the sample array with uniformly distributed SH samples across the unit sphere, using jittered stratification
+void SH::init_samples(Sample samples[SAMPLE_COUNT]) {
+	const float inv_sqrt_n_samples = 1.0f / (float)SQRT_SAMPLE_COUNT;
 
 	std::random_device random_device;
 	std::mt19937 gen(random_device());
 	std::uniform_real_distribution<float> U01(0.0f, 1.0f);
 
-	for (int i = 0; i < sqrt_n_samples; i++) {
-		for (int j = 0; j < sqrt_n_samples; j++) {
+	for (int i = 0; i < SQRT_SAMPLE_COUNT; i++) {
+		for (int j = 0; j < SQRT_SAMPLE_COUNT; j++) {
 			// Generate unbiased distribution of spherical coords
 			float x = ((float)i + U01(gen)) * inv_sqrt_n_samples;
 			float y = ((float)j + U01(gen)) * inv_sqrt_n_samples;
@@ -118,7 +118,7 @@ void SH::init_samples(Sample samples[], int sqrt_n_samples, int n_bands) {
 			float theta = 2.0f * acos(sqrt(1.0f - x));
 			float phi   = 2.0f * PI * y;
 			
-			int index = i * sqrt_n_samples + j;
+			int index = i * SQRT_SAMPLE_COUNT + j;
 
 			// Store polar coords
 			samples[index].theta = theta;
@@ -128,7 +128,7 @@ void SH::init_samples(Sample samples[], int sqrt_n_samples, int n_bands) {
 			samples[index].direction = glm::vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
 
 			// Precompute all SH coefficients for this sample
-			for (int l = 0; l < n_bands; l++) {
+			for (int l = 0; l < SH_NUM_BANDS; l++) {
 				for (int m = -l; m <= l; m++) {
 					samples[index].coeffs[SH_INDEX(l, m)] = evaluate(l, m, theta, phi);
 				}

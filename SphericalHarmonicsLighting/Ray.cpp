@@ -22,87 +22,87 @@ AABB Triangle::calc_aabb() const {
 }
 
 bool Ray::intersects(const Triangle& triangle) const {
-	float dot = glm::dot(direction, triangle.plane.normal);
+	// @PERFORMANCE
+	glm::vec3 e0 = triangle.vertices[1] - triangle.vertices[0];
+	glm::vec3 e1 = triangle.vertices[2] - triangle.vertices[0];
 
-	// If the plane's normal is orthogonal to the Ray's direction there can be no intersection
-	if (abs(dot) < 0.001f) return false;
+	glm::vec3 h = glm::cross(direction, e1);
+	float a = glm::dot(e0, h);
 
-	// Get the ray parameter where it meets the plane
-	float t = -(glm::dot(origin, triangle.plane.normal) + triangle.plane.distance) / dot;
+	float f = 1.0f / a;
+	glm::vec3 s = origin - triangle.vertices[0];
+	float _u = f * glm::dot(s, h);
 
-	// If t is negative the intersection takes place behind the Ray
-	if (t <= 0.0f) return false;
+	if (_u < 0.0f || _u > 1.0f) return false;
 
-	// Calculate the point of intersection between the Ray and Plane
-	glm::vec3 intersection_point = origin + t * direction;
+	glm::vec3 q = glm::cross(s, e0);
+	float _v = f * glm::dot(direction, q);
 
-	glm::vec3 v0 = triangle.vertices[0] - intersection_point;
-	glm::vec3 v1 = triangle.vertices[1] - intersection_point;
-	glm::vec3 v2 = triangle.vertices[2] - intersection_point;
+	if (_v < 0.0f || _u + _v > 1.0f) return false;
 
-	float length0 = glm::length(v0);
-	float length1 = glm::length(v1);
-	float length2 = glm::length(v2);
+	float t = f * glm::dot(e1, q);
 
-	// Calculate the angles between these vectors
-	float angle = 
-		acos(glm::clamp(glm::dot(v0, v1) / (length0 * length1), -1.0f, 1.0f)) +
-		acos(glm::clamp(glm::dot(v1, v2) / (length1 * length2), -1.0f, 1.0f)) +
-		acos(glm::clamp(glm::dot(v2, v0) / (length2 * length0), -1.0f, 1.0f));
-
-	// If the sum of the angles is greater than 2 pi radians, then the point is inside the triangle
-	return angle >= 1.99f * PI;
+	if (t <= EPSILON) return false;
+	
+	return true;
 }
 
-float Ray::distance(const Triangle& triangle) const {
-	float dot = glm::dot(direction, triangle.plane.normal);
+float Ray::trace(const Triangle& triangle, int indices[3], float& u, float& v) const {
+	// @PERFORMANCE
+	glm::vec3 e0 = triangle.vertices[1] - triangle.vertices[0];
+	glm::vec3 e1 = triangle.vertices[2] - triangle.vertices[0];
 
-	// If the plane's normal is orthogonal to the Ray's direction there can be no intersection
-	if (abs(dot) < 0.001f) return false;
+	glm::vec3 h = glm::cross(direction, e1);
+	float a = glm::dot(e0, h);
+	
+	float f = 1.0f / a;
+	glm::vec3 s = origin - triangle.vertices[0];
+	float _u = f * glm::dot(s, h);
 
-	// Get the ray parameter where it meets the plane
-	float t = -(glm::dot(origin, triangle.plane.normal) + triangle.plane.distance) / dot;
+	if (_u < 0.0f || _u > 1.0f) return INFINITY;
 
-	// If t is negative the intersection takes place behind the Ray
-	if (t <= 0.0f) return false;
+	glm::vec3 q = glm::cross(s, e0);
+	float _v = f * glm::dot(direction, q);
 
-	// Calculate the point of intersection between the Ray and Plane
-	glm::vec3 intersection_point = origin + t * direction;
+	if (_v < 0.0f || _u + _v > 1.0f) return INFINITY;
 
-	glm::vec3 v0 = triangle.vertices[0] - intersection_point;
-	glm::vec3 v1 = triangle.vertices[1] - intersection_point;
-	glm::vec3 v2 = triangle.vertices[2] - intersection_point;
+	float t = f * glm::dot(e1, q);
 
-	float length0 = glm::length(v0);
-	float length1 = glm::length(v1);
-	float length2 = glm::length(v2);
+	if (t <= EPSILON) return INFINITY;
 
-	// Calculate the angles between these vectors
-	float angle =
-		acos(glm::clamp(glm::dot(v0, v1) / (length0 * length1), -1.0f, 1.0f)) +
-		acos(glm::clamp(glm::dot(v1, v2) / (length1 * length2), -1.0f, 1.0f)) +
-		acos(glm::clamp(glm::dot(v2, v0) / (length2 * length0), -1.0f, 1.0f));
+	memcpy(indices, triangle.indices, 3 * sizeof(int));
+	u = _u;
+	v = _v;
 
-	// If the sum of the angles is greater than 2 pi radians, then the point is inside the triangle
-	if (angle >= 1.99f * PI) {
-		return t;
-	} else {
-		return INFINITY;
-	}
+	return t;
 }
 
 bool Ray::intersects(const AABB& aabb) const {
-	glm::vec3 inv_direction(1.0f / direction.x, 1.0f / direction.y, 1.0f / direction.z);
+	float inv_direction_x = 1.0f / direction.x;
+	float inv_direction_y = 1.0f / direction.y;
+	float inv_direction_z = 1.0f / direction.z;
 
-    float t1 = (aabb.min.x - origin.x) * inv_direction.x;
-    float t2 = (aabb.max.x - origin.x) * inv_direction.x;
-    float t3 = (aabb.min.y - origin.y) * inv_direction.y;
-    float t4 = (aabb.max.y - origin.y) * inv_direction.y;
-    float t5 = (aabb.min.z - origin.z) * inv_direction.z;
-    float t6 = (aabb.max.z - origin.z) * inv_direction.z;
-
-    float t_min = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
-    float t_max = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));
-
-    return t_max >= 0.0f && t_min < t_max;
+	float tmin = (aabb.min.x - origin.x) * inv_direction_x; 
+    float tmax = (aabb.max.x - origin.x) * inv_direction_x; 
+ 
+    if (tmin > tmax) std::swap(tmin, tmax); 
+ 
+    float tymin = (aabb.min.y - origin.y) * inv_direction_y; 
+    float tymax = (aabb.max.y - origin.y) * inv_direction_y; 
+ 
+    if (tymin > tymax) std::swap(tymin, tymax); 
+ 
+    if ((tmin > tymax) || (tymin > tmax)) return false; 
+ 
+    if (tymin > tmin) tmin = tymin; 
+    if (tymax < tmax) tmax = tymax; 
+ 
+    float tzmin = (aabb.min.z - origin.z) * inv_direction_z; 
+    float tzmax = (aabb.max.z - origin.z) * inv_direction_z; 
+ 
+    if (tzmin > tzmax) std::swap(tzmin, tzmax); 
+ 
+    if ((tmin > tzmax) || (tzmin > tmax)) return false; 
+ 
+    return true;
 }
