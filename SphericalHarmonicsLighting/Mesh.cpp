@@ -380,7 +380,6 @@ void Mesh::init_shader(const SH::Sample samples[SAMPLE_COUNT], glm::vec3 transfe
 
 	// Afer uploading this data to the GPU it can be removed from CPU RAM
 	delete[] vertices;
-	delete[] transfer_coeffs;
 }
 
 bool Mesh::intersects(const Ray& ray) const {
