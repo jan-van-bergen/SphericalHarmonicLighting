@@ -152,8 +152,8 @@ KD_Node * KD_Node::build(int triangle_count, Triangle const * const triangles[])
 	}
 
 	// Allocate a new buffer for the Triangle pointers to be copied into
-	// The buffer grows left to right, containing the Triangles left of the average
-	// The buffer grows right to left, containing the Triangles right of the average
+	// The buffer grows left to right, containing the Triangles left  of the average (along the longest axis)
+	// The buffer grows right to left, containing the Triangles right of the average (along the longest axis)
 	Triangle const ** triangle_buffer = new Triangle const *[triangle_count];
 
 	// Indices indicating where the two buffers growing towards eachother currently are

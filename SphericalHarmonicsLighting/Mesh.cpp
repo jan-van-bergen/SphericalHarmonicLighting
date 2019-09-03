@@ -287,10 +287,15 @@ void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE
 						glm::vec3 hit_normal2 = hit_mesh->mesh_data->vertices[indices[2]].normal;
 
 						// Calculate actual hit normal by blending the normals using the barycentric u,v,w coordinates
-						glm::vec3 hit_normal = weight_u * hit_normal0 + weight_v * hit_normal1 + weight_w * hit_normal2;
+						glm::vec3 hit_normal = glm::normalize(weight_u * hit_normal0 + weight_v * hit_normal1 + weight_w * hit_normal2);
 
 						// Obtain reflection direction R
 						glm::vec3 R = glm::reflect(-ray.direction, hit_normal);
+
+						/////////////////////////////////////////////////////////////////////////////////////////////////
+						// @TODO: check if it's possible to reflect in spherical coordinates, in which case we can use //
+						// theta,phi from the current sample, instead of recalculating R_theta,R_phi each iteration	   //
+						/////////////////////////////////////////////////////////////////////////////////////////////////
 
 						// Convert reflection direction R into spherical coordinates (R_theta, R_phi)
 						float R_theta       = acos(R.z);

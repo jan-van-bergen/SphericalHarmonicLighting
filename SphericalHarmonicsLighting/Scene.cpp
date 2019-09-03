@@ -5,7 +5,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "VectorMath.h"
-
 #include "SHRotation.h"
 
 #include "ScopedTimer.h"
@@ -13,12 +12,14 @@
 #include "Util.h"
 
 Scene::Scene() : shader_diffuse(), shader_glossy(), angle(0) {
-	mesh_count = 2;
+	mesh_count = 3;
 	meshes = ALLOC_ARRAY(Mesh, mesh_count);
 	Mesh * monkey = new(&meshes[0]) Mesh(DATA_PATH("Models/MonkeySubdivided2.obj"), shader_glossy);
 	Mesh * plane  = new(&meshes[1]) Mesh(DATA_PATH("Models/Plane.obj"),             shader_glossy);
+	Mesh * test   = new(&meshes[2]) Mesh(DATA_PATH("Models/Test.obj"),              shader_glossy);
 	
 	plane->material.diffuse_colour = glm::vec3(1.0f, 0.0f, 0.0f);
+	test->material.diffuse_colour  = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	// @TODO: maybe make the Light a user choice?
 	light_count = 1;
@@ -76,7 +77,7 @@ void Scene::init() {
 
 		// Then do subsequent bounce passes
 		for (int b = 1; b <= NUM_BOUNCES; b++) {
-			printf("Bounce %i\n", b);
+			ScopedTimer timer("Bounce");
 
 			for (int m = 0; m < mesh_count; m++) {
 				meshes[m].init_light_bounce(*this, samples, bounces_scene_coeffs[b - 1], bounces_scene_coeffs[b] + meshes[m].transfer_coeffs_scene_offset);
