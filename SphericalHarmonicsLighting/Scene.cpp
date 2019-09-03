@@ -45,30 +45,33 @@ void Scene::init() {
 	bool all_meshes_loaded = true;
 	int scene_coeff_count = 0;
 	
-	// Try to load transfer coefficients for all Meshes and record if any Mesh failed to load
-	for (int m = 0; m < mesh_count; m++) {
-		bool was_loaded = meshes[m].try_to_load_transfer_coeffs();
-		all_meshes_loaded &= was_loaded;
+	glm::vec3 * bounces_scene_coeffs[NUM_BOUNCES + 1];
 
-		meshes[m].init_material(samples);
-
+	for (int m = 0; m < mesh_count; m++) {		
 		meshes[m].transfer_coeffs_scene_offset = scene_coeff_count;
 		scene_coeff_count += meshes[m].vertex_count * meshes[m].transfer_coeff_count;
 	}
+	
+	bounces_scene_coeffs[0] = new glm::vec3[scene_coeff_count];
+	memset(bounces_scene_coeffs[0], 0, scene_coeff_count * sizeof(glm::vec3));
 
-	if (!all_meshes_loaded) {
-		glm::vec3 * bounces_scene_coeffs[NUM_BOUNCES + 1];
-		
-		for (int b = 0; b <= NUM_BOUNCES; b++) {
+	// Try to load transfer coefficients for all Meshes and record if any Mesh failed to load
+	for (int m = 0; m < mesh_count; m++) {
+		bool was_loaded = meshes[m].try_to_load_transfer_coeffs(bounces_scene_coeffs[0] + meshes[m].transfer_coeffs_scene_offset);
+		all_meshes_loaded &= was_loaded;
+
+		meshes[m].init_material(samples);
+	}
+
+	if (!all_meshes_loaded) {	
+		for (int b = 1; b <= NUM_BOUNCES; b++) {
 			bounces_scene_coeffs[b] = new glm::vec3[scene_coeff_count];
 			memset(bounces_scene_coeffs[b], 0, scene_coeff_count * sizeof(glm::vec3));
 		}
 
 		// First do direct lighting pass
 		for (int m = 0; m < mesh_count; m++) {
-			meshes[m].init_light_direct(*this, samples);
-
-			memcpy(bounces_scene_coeffs[0] + meshes[m].transfer_coeffs_scene_offset, meshes[m].transfer_coeffs, meshes[m].vertex_count * meshes[m].transfer_coeff_count * sizeof(glm::vec3));
+			meshes[m].init_light_direct(*this, samples, bounces_scene_coeffs[0] + meshes[m].transfer_coeffs_scene_offset);
 		}
 
 		// Then do subsequent bounce passes
@@ -83,10 +86,11 @@ void Scene::init() {
 		// Sum all bounces of self transferred light back into sh_coeff
 		for (int b = 1; b <= NUM_BOUNCES; b++) {
 			for (int m = 0; m < mesh_count; m++) {
-				const glm::vec3 * bounce_coeffs = bounces_scene_coeffs[b] + meshes[m].transfer_coeffs_scene_offset;
+				glm::vec3       * transfer_coeffs = bounces_scene_coeffs[0] + meshes[m].transfer_coeffs_scene_offset;
+				glm::vec3 const * bounce_coeffs   = bounces_scene_coeffs[b] + meshes[m].transfer_coeffs_scene_offset;
 
 				for (int i = 0; i < meshes[m].vertex_count * meshes[m].transfer_coeff_count; i++) {
-					meshes[m].transfer_coeffs[i] += bounce_coeffs[i];
+					transfer_coeffs[i] += bounce_coeffs[i];
 				}
 			}
 
@@ -95,13 +99,15 @@ void Scene::init() {
 
 		// Save transfer coefficients to disk
 		for (int m = 0; m < mesh_count; m++) {
-			meshes[m].save_transfer_coeffs();
+			meshes[m].save_transfer_coeffs(bounces_scene_coeffs[0] + meshes[m].transfer_coeffs_scene_offset);
 		}
 	}
 
 	for (int m = 0; m < mesh_count; m++) {
-		meshes[m].init_shader(samples);
+		meshes[m].init_shader(samples, bounces_scene_coeffs[0] + meshes[m].transfer_coeffs_scene_offset);
 	}
+
+	delete[] bounces_scene_coeffs[0];
 
 	for (int i = 0; i < light_count; i++) {
 		lights[i]->init(samples);

@@ -39,6 +39,35 @@ Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_nam
 		triangles[i].plane.normal   =  glm::normalize(glm::cross(edge0, edge1));
 		triangles[i].plane.distance = -glm::dot(triangles[i].plane.normal, triangles[i].vertices[0]);
 	}
+
+	transfer_coeffs_file_name = new char[1024];
+
+	u32 file_name_length = strlen(file_name);
+	strcpy_s(transfer_coeffs_file_name, file_name_length + 1, file_name);
+
+	int last_dot_index = StringHelper::last_index_of(".", transfer_coeffs_file_name);
+	assert(last_dot_index != INVALID);
+
+	transfer_coeff_count = INVALID;
+	switch (material.shader.type) {
+		case MeshShader::Type::DIFFUSE: {
+			// For diffuse transfer functions we use a SH_COEFFICIENT_COUNT dimensional vector
+			transfer_coeff_count = SH_COEFFICIENT_COUNT;
+
+			const char * diffuse_str = "_diffuse.dat";
+			strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(diffuse_str) + 1, diffuse_str);
+		} break;
+
+		case MeshShader::Type::GLOSSY: {
+			// For glossy transfer functions we use a SH_COEFFICIENT_COUNT x SH_COEFFICIENT_COUNT matrix
+			transfer_coeff_count = SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT;
+
+			const char * glossy_str = "_glossy.dat";
+			strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(glossy_str) + 1, glossy_str);
+		} break;
+
+		default: abort();
+	}
 	
 	{
 		ScopedTimer timer("KD Tree Construction");
@@ -94,38 +123,7 @@ void Mesh::init_material(const SH::Sample samples[SAMPLE_COUNT]) {
 	}
 }
 
-bool Mesh::try_to_load_transfer_coeffs() {
-	transfer_coeffs_file_name = new char[1024];
-
-	u32 file_name_length = strlen(file_name);
-	strcpy_s(transfer_coeffs_file_name, file_name_length + 1, file_name);
-
-	int last_dot_index = StringHelper::last_index_of(".", transfer_coeffs_file_name);
-	assert(last_dot_index != INVALID);
-
-	transfer_coeff_count = INVALID;
-	switch (material.shader.type) {
-		case MeshShader::Type::DIFFUSE: {
-			// For diffuse transfer functions we use a SH_COEFFICIENT_COUNT dimensional vector
-			transfer_coeff_count = SH_COEFFICIENT_COUNT;
-
-			const char * diffuse_str = "_diffuse.dat";
-			strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(diffuse_str) + 1, diffuse_str);
-		} break;
-
-		case MeshShader::Type::GLOSSY: {
-			// For glossy transfer functions we use a SH_COEFFICIENT_COUNT x SH_COEFFICIENT_COUNT matrix
-			transfer_coeff_count = SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT;
-
-			const char * glossy_str = "_glossy.dat";
-			strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(glossy_str) + 1, glossy_str);
-		} break;
-
-		default: abort();
-	}
-	
-	transfer_coeffs = new glm::vec3[vertex_count * transfer_coeff_count];
-	
+bool Mesh::try_to_load_transfer_coeffs(glm::vec3 transfer_coeffs[]) {
 	bool was_loaded = false;
 
 	std::ifstream in_file(transfer_coeffs_file_name, std::ios::in | std::ios::binary); 
@@ -152,7 +150,7 @@ bool Mesh::try_to_load_transfer_coeffs() {
 	return was_loaded;
 }
 
-void Mesh::save_transfer_coeffs() const {
+void Mesh::save_transfer_coeffs(glm::vec3 transfer_coeffs[]) const {
 	assert(transfer_coeffs_file_name);
 	assert(transfer_coeffs);
 
@@ -167,9 +165,11 @@ void Mesh::save_transfer_coeffs() const {
 		out_file.write(reinterpret_cast<const char*>(transfer_coeffs), vertex_count * transfer_coeff_count * sizeof(glm::vec3));
 	}
 	out_file.close();
+
+	delete[] transfer_coeffs_file_name;
 }
 
-void Mesh::init_light_direct(const Scene& scene, const SH::Sample samples[SAMPLE_COUNT]) {
+void Mesh::init_light_direct(const Scene& scene, const SH::Sample samples[SAMPLE_COUNT], glm::vec3 transfer_coeffs[]) {
 	const int index_count  = mesh_data->index_count;
 
 	ScopedTimer timer("Mesh Direct + Shadowed Lighting");
@@ -349,7 +349,7 @@ void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE
 	}
 }
 
-void Mesh::init_shader(const SH::Sample samples[SAMPLE_COUNT]) {
+void Mesh::init_shader(const SH::Sample samples[SAMPLE_COUNT], glm::vec3 transfer_coeffs[]) {
 	Vertex * vertices = new Vertex[vertex_count];
 	
 	// Copy positions and normals
