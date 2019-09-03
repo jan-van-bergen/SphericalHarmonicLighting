@@ -140,15 +140,6 @@ void Mesh::init_light_direct(const Scene& scene, const SH::Sample samples[SAMPLE
 	Ray ray;
 	hits = new bool[vertex_count * SAMPLE_COUNT];
 	
-	ray.origin    = glm::vec3(0.9f,  0.0f, 0.9f);
-	ray.direction = glm::vec3(0.0f, -1.0f, 0.0f);
-
-	int __indices[3];
-	float __u, __v;
-	glm::vec3 __albedo;
-
-	bool test = scene.trace(ray, __indices, __u, __v, __albedo);
-
 	// Iterate over vertices
 	for (int v = 0; v < vertex_count; v++) {
 		// Initialize SH coefficients to 0
