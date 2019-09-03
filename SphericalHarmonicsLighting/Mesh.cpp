@@ -105,7 +105,7 @@ void Mesh::init_material(const SH::Sample samples[SAMPLE_COUNT]) {
 		
 		Phong_BRDF brdf;
 		brdf.specular_power = material.specular_power;
-		brdf.diffuse_colour = material.diffuse_colour;
+		brdf.diffuse_colour = material.albedo;
 
 		glm::vec3 brdf_coeffs_full[SH_COEFFICIENT_COUNT];
 		for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
@@ -204,7 +204,7 @@ void Mesh::init_light_direct(const Scene& scene, const SH::Sample samples[SAMPLE
 						case MeshShader::Type::DIFFUSE: {
 							for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 								// Add the contribution of this sample
-								transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] += material.diffuse_colour * dot * samples[s].coeffs[i];
+								transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] += material.albedo * dot * samples[s].coeffs[i];
 							}
 						} break;
 
@@ -270,7 +270,7 @@ void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE
 					const glm::vec3 * hit_transfer_coeffs_vertex2 = previous_bounce_transfer_coeffs + (indices[2] * hit_mesh->transfer_coeff_count + hit_mesh->transfer_coeffs_scene_offset);
 
 					if (material.shader.type == MeshShader::Type::DIFFUSE && hit_mesh->material.shader.type == MeshShader::Type::DIFFUSE) {
-						glm::vec3 hit_albedo = hit_mesh->material.diffuse_colour * ONE_OVER_PI;
+						glm::vec3 hit_albedo = hit_mesh->material.albedo * ONE_OVER_PI;
 
 						// Sum reflected SH light for this vertex
 						// Lerp hit vertices SH vectors to get SH at hit point
@@ -321,16 +321,16 @@ void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE
 							for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
 								glm::vec3 k_sum(0.0f, 0.0f, 0.0f);
 
-								int k = 0;
 								for (int l = 0; l < SH_NUM_BANDS; l++) {
 									for (int m = -l; m <= l; m++) {
+										int k = l*(l+1) + m;
+
 										glm::vec3 M_kj = 
 											weight_u * hit_transfer_coeffs_vertex0[k * SH_COEFFICIENT_COUNT + j] +
 											weight_v * hit_transfer_coeffs_vertex1[k * SH_COEFFICIENT_COUNT + j] +
 											weight_w * hit_transfer_coeffs_vertex2[k * SH_COEFFICIENT_COUNT + j];
 
 										k_sum += hit_mesh->material.brdf_coeffs[l] * M_kj * y_R[k];
-										k++;
 									}
 								}
 

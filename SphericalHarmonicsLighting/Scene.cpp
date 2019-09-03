@@ -14,12 +14,12 @@
 Scene::Scene() : shader_diffuse(), shader_glossy(), angle(0) {
 	mesh_count = 3;
 	meshes = ALLOC_ARRAY(Mesh, mesh_count);
-	Mesh * monkey = new(&meshes[0]) Mesh(DATA_PATH("Models/MonkeySubdivided2.obj"), shader_glossy);
-	Mesh * plane  = new(&meshes[1]) Mesh(DATA_PATH("Models/Plane.obj"),             shader_glossy);
-	Mesh * test   = new(&meshes[2]) Mesh(DATA_PATH("Models/Test.obj"),              shader_glossy);
+	Mesh * monkey = new(&meshes[0]) Mesh(DATA_PATH("Models/MonkeySubdivided2.obj"), shader_diffuse);
+	Mesh * plane  = new(&meshes[1]) Mesh(DATA_PATH("Models/Plane.obj"),             shader_diffuse);
+	Mesh * test   = new(&meshes[2]) Mesh(DATA_PATH("Models/Test.obj"),              shader_diffuse);
 	
-	plane->material.diffuse_colour = glm::vec3(1.0f, 0.0f, 0.0f);
-	test->material.diffuse_colour  = glm::vec3(0.0f, 1.0f, 0.0f);
+	plane->material.albedo = glm::vec3(1.0f, 0.0f, 0.0f);
+	test->material.albedo  = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	// @TODO: maybe make the Light a user choice?
 	light_count = 1;

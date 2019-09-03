@@ -19,7 +19,7 @@ struct Material {
 	const MeshShader& shader;
 
 	float     specular_power = 1.0f;
-	glm::vec3 diffuse_colour = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 albedo         = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	glm::vec3 brdf_coeffs[SH_NUM_BANDS]; // NOTE: only used by GLOSSY shader
 
