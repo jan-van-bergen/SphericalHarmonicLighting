@@ -57,7 +57,7 @@ void Scene::init() {
 	}
 
 	if (!all_meshes_loaded) {
-		glm::vec3 ** bounces_scene_coeffs = new glm::vec3 *[NUM_BOUNCES + 1];
+		glm::vec3 * bounces_scene_coeffs[NUM_BOUNCES + 1];
 		
 		for (int b = 0; b <= NUM_BOUNCES; b++) {
 			bounces_scene_coeffs[b] = new glm::vec3[scene_coeff_count];
@@ -92,8 +92,6 @@ void Scene::init() {
 
 			delete[] bounces_scene_coeffs[b];
 		}
-
-		delete[] bounces_scene_coeffs;
 
 		// Save transfer coefficients to disk
 		for (int m = 0; m < mesh_count; m++) {
