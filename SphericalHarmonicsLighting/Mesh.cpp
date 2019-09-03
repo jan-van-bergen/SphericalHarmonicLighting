@@ -339,7 +339,7 @@ void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE
 			}
 		}
 		
-		printf("Bounce n: Vertex %u out of %u done\n", v, vertex_count);
+		//printf("Bounce n: Vertex %u out of %u done\n", v, vertex_count);
 	}
 	
 	const float normalization_factor = 4.0f * PI / SAMPLE_COUNT;
