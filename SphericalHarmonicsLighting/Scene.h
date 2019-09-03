@@ -18,6 +18,7 @@
 struct Material {
 	const MeshShader& shader;
 
+	float     specular_power = 1.0f;
 	glm::vec3 diffuse_colour = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	glm::vec3 brdf_coeffs[SH_NUM_BANDS]; // NOTE: only used by GLOSSY shader
@@ -50,6 +51,7 @@ public:
 	
 	int vertex_count;
 
+	int         transfer_coeffs_scene_offset;
 	glm::vec3 * transfer_coeffs;
 	int         transfer_coeff_count; // Either SH_COEFFICIENT_COUNT or SH_COEFFICIENT_COUNT^2, depending on DIFFUSE / GLOSSY Shader
 
@@ -57,11 +59,10 @@ public:
 
 	Mesh(const char* file_name, const MeshShader& shader);
 
-	//void init(const Scene& scene, int sample_count, const SH::Sample samples[]);
-	
 	bool try_to_load_transfer_coeffs();
 	void save_transfer_coeffs() const;
 
+	void init_material(const SH::Sample[SAMPLE_COUNT]);
 	void init_light_direct(const Scene& scene, const SH::Sample[SAMPLE_COUNT]);
 	void init_light_bounce(const Scene& scene, const SH::Sample[SAMPLE_COUNT], const glm::vec3 previous_bounce_transfer_coeffs[], glm::vec3 bounce_transfer_coeffs[]);
 	void init_shader(const SH::Sample[SAMPLE_COUNT]);
@@ -90,14 +91,14 @@ public:
 
 	void init();
 
-	void update(float delta, const u8* keys);
+	void update(float delta, const u8 * keys);
 
 	void render() const;
 
 	void debug(GLuint uni_debug_view_projection) const;
 
 	bool  intersects(const Ray& ray) const;
-	float trace     (const Ray& ray, int indices[3], float& u, float& v, glm::vec3& albedo) const;
+	float trace     (const Ray& ray, int indices[3], float& u, float& v, const Mesh *& mesh) const;
 
 private:
 	const DiffuseShader shader_diffuse;
@@ -105,8 +106,6 @@ private:
 
 	Mesh * meshes;
 	int    mesh_count;
-
-	int * mesh_scene_coeff_offsets; // Array of mesh_count elements
 
 	Light ** lights;
 	int      light_count;

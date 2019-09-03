@@ -15,8 +15,8 @@
 Scene::Scene() : shader_diffuse(), shader_glossy(), angle(0) {
 	mesh_count = 2;
 	meshes = ALLOC_ARRAY(Mesh, mesh_count);
-	Mesh * monkey = new(&meshes[0]) Mesh(DATA_PATH("Models/MonkeySubdivided2.obj"), shader_diffuse);
-	Mesh * plane  = new(&meshes[1]) Mesh(DATA_PATH("Models/Plane.obj"),             shader_diffuse);
+	Mesh * monkey = new(&meshes[0]) Mesh(DATA_PATH("Models/MonkeySubdivided2.obj"), shader_glossy);
+	Mesh * plane  = new(&meshes[1]) Mesh(DATA_PATH("Models/Plane.obj"),             shader_glossy);
 	
 	plane->material.diffuse_colour = glm::vec3(1.0f, 0.0f, 0.0f);
 
@@ -45,15 +45,15 @@ void Scene::init() {
 	bool all_meshes_loaded = true;
 	int scene_coeff_count = 0;
 	
-	mesh_scene_coeff_offsets = new int[mesh_count];
-
 	// Try to load transfer coefficients for all Meshes and record if any Mesh failed to load
-	for (int i = 0; i < mesh_count; i++) {
-		bool was_loaded = meshes[i].try_to_load_transfer_coeffs();
+	for (int m = 0; m < mesh_count; m++) {
+		bool was_loaded = meshes[m].try_to_load_transfer_coeffs();
 		all_meshes_loaded &= was_loaded;
 
-		mesh_scene_coeff_offsets[i] = scene_coeff_count;
-		scene_coeff_count += meshes[i].vertex_count * meshes[i].transfer_coeff_count;
+		meshes[m].init_material(samples);
+
+		meshes[m].transfer_coeffs_scene_offset = scene_coeff_count;
+		scene_coeff_count += meshes[m].vertex_count * meshes[m].transfer_coeff_count;
 	}
 
 	if (!all_meshes_loaded) {
@@ -68,7 +68,7 @@ void Scene::init() {
 		for (int m = 0; m < mesh_count; m++) {
 			meshes[m].init_light_direct(*this, samples);
 
-			memcpy(bounces_scene_coeffs[0] + mesh_scene_coeff_offsets[m], meshes[m].transfer_coeffs, meshes[m].vertex_count * meshes[m].transfer_coeff_count * sizeof(glm::vec3));
+			memcpy(bounces_scene_coeffs[0] + meshes[m].transfer_coeffs_scene_offset, meshes[m].transfer_coeffs, meshes[m].vertex_count * meshes[m].transfer_coeff_count * sizeof(glm::vec3));
 		}
 
 		// Then do subsequent bounce passes
@@ -76,14 +76,14 @@ void Scene::init() {
 			printf("Bounce %i\n", b);
 
 			for (int m = 0; m < mesh_count; m++) {
-				meshes[m].init_light_bounce(*this, samples, bounces_scene_coeffs[b - 1], bounces_scene_coeffs[b] + mesh_scene_coeff_offsets[m]);
+				meshes[m].init_light_bounce(*this, samples, bounces_scene_coeffs[b - 1], bounces_scene_coeffs[b] + meshes[m].transfer_coeffs_scene_offset);
 			}
 		}
 
 		// Sum all bounces of self transferred light back into sh_coeff
 		for (int b = 1; b <= NUM_BOUNCES; b++) {
 			for (int m = 0; m < mesh_count; m++) {
-				const glm::vec3 * bounce_coeffs = bounces_scene_coeffs[b] + mesh_scene_coeff_offsets[m];
+				const glm::vec3 * bounce_coeffs = bounces_scene_coeffs[b] + meshes[m].transfer_coeffs_scene_offset;
 
 				for (int i = 0; i < meshes[m].vertex_count * meshes[m].transfer_coeff_count; i++) {
 					meshes[m].transfer_coeffs[i] += bounce_coeffs[i];
@@ -100,8 +100,6 @@ void Scene::init() {
 			meshes[m].save_transfer_coeffs();
 		}
 	}
-
-	delete[] mesh_scene_coeff_offsets;
 
 	for (int m = 0; m < mesh_count; m++) {
 		meshes[m].init_shader(samples);
@@ -181,7 +179,7 @@ bool Scene::intersects(const Ray& ray) const {
 	return false;
 }
 
-float Scene::trace(const Ray& ray, int indices[3], float& u, float& v, glm::vec3& albedo) const {
+float Scene::trace(const Ray& ray, int indices[3], float& u, float& v, const Mesh *& mesh) const {
 	float min_distance = INFINITY;
 
 	int   _indices[3];
@@ -193,13 +191,11 @@ float Scene::trace(const Ray& ray, int indices[3], float& u, float& v, glm::vec3
 		if (distance < min_distance) {
 			min_distance = distance;
 
-			indices[0] = _indices[0] * meshes[m].transfer_coeff_count + mesh_scene_coeff_offsets[m];
-			indices[1] = _indices[1] * meshes[m].transfer_coeff_count + mesh_scene_coeff_offsets[m];
-			indices[2] = _indices[2] * meshes[m].transfer_coeff_count + mesh_scene_coeff_offsets[m];
+			memcpy(indices, _indices, 3 * sizeof(int));
 			u = _u;
 			v = _v;
 
-			albedo = meshes[m].material.diffuse_colour * ONE_OVER_PI;
+			mesh = &meshes[m];
 		}
 	}
 

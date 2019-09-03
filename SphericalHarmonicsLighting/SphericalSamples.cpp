@@ -2,8 +2,6 @@
 
 #include <random>
 
-#include "Util.h"
-
 // Converts l, m representation into a 1 dimensional index
 #define SH_INDEX(l, m) (l * (l+1) + m)
 
@@ -85,12 +83,7 @@ float K(int l, int m) {
 	);
 }
 
-// Returns a point sample of a Spherical Harmonic basis function
-// l is the band, range [0..N]
-// m in the range [-l..l]
-// theta in the range [0..Pi]
-// phi in the range [0..2*Pi]
-float evaluate(int l, int m, float theta, float phi) {
+float SH::evaluate(int l, int m, float theta, float phi) {
 	if (m == 0) {
 		return K(l, 0) * P(l, m, cos(theta));
 	} else if(m > 0) {
@@ -100,7 +93,6 @@ float evaluate(int l, int m, float theta, float phi) {
 	}
 } 
 
-// Fills the sample array with uniformly distributed SH samples across the unit sphere, using jittered stratification
 void SH::init_samples(Sample samples[SAMPLE_COUNT]) {
 	const float inv_sqrt_n_samples = 1.0f / (float)SQRT_SAMPLE_COUNT;
 
@@ -137,28 +129,6 @@ void SH::init_samples(Sample samples[SAMPLE_COUNT]) {
 	}
 }
 
-// Projects a given polar function into Spherical Harmonic coefficients.
-// This is done using Monte Carlo integration, using the samples provided in the samples array
-void SH::project_polar_function(PolarFunction polar_function, int n_samples, const Sample samples[], glm::vec3 result[]) {
-	// For each sample
-	for (int i = 0; i < n_samples; i++) {
-		float theta = samples[i].theta;
-		float phi   = samples[i].phi;
-
-		// For each SH coefficient
-		for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
-			result[j] += polar_function(theta, phi) * samples[i].coeffs[j];
-		}
-	}
-
-	//  Weighted by the surface area of a 3D unit sphere, divided by the number of samples
-	const float factor = 4.0f * PI / n_samples;
-	for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-		result[i] *= factor;
-	}
-}
-
-// Formula from "An Efficient Representation for Irradiance Environment Maps" by Ramamoorthi and Hanrahan
 void SH::calc_phong_lobe_coeffs(float result[SH_NUM_BANDS]) {
 	assert(SH_NUM_BANDS > 0);
 

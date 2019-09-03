@@ -57,6 +57,43 @@ Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_nam
 	}
 }
 
+void Mesh::init_material(const SH::Sample samples[SAMPLE_COUNT]) {
+	// For GLOSSY materials, we need to convolve with a BRDF (Phong lobe)
+	// We compute this here and pass it to the Shader
+	if (material.shader.type == MeshShader::Type::GLOSSY) {	
+		struct Phong_BRDF {
+			float     specular_power;
+			glm::vec3 diffuse_colour;
+
+			inline glm::vec3 operator() (float theta, float phi) {
+				float dot = cos(theta);
+
+				if (dot > 0.0f) return diffuse_colour * glm::vec3(pow(dot, specular_power));
+		
+				return glm::vec3(0.0f, 0.0f, 0.0f);
+			}
+		};
+		
+		Phong_BRDF brdf;
+		brdf.specular_power = material.specular_power;
+		brdf.diffuse_colour = material.diffuse_colour;
+
+		glm::vec3 brdf_coeffs_full[SH_COEFFICIENT_COUNT];
+		for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+			brdf_coeffs_full[i] = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
+
+		// Project the BRDF into Spherical Harmonic representation using Monte Carlo integration
+		SH::project_polar_function(brdf, samples, brdf_coeffs_full);
+
+		// Because the kernel is only dependend on theta, we can condense it into a representation with only 
+		// SH_NUM_BANDS coefficients instead of the standard SH_NUM_BANDS^2 coefficients.
+		for (int l = 0; l < SH_NUM_BANDS; l++) {
+			material.brdf_coeffs[l] = sqrt(4.0f * PI / (2.0f * l + 1.0f)) * brdf_coeffs_full[l*(l + 1)];
+		}
+	}
+}
+
 bool Mesh::try_to_load_transfer_coeffs() {
 	transfer_coeffs_file_name = new char[1024];
 
@@ -205,7 +242,8 @@ void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE
 	int indices[3];
 	float weight_u;
 	float weight_v;
-	glm::vec3 albedo;
+
+	const Mesh * hit_mesh = NULL;
 
 	// Iterate over vertices
 	for (int v = 0; v < vertex_count; v++) {
@@ -219,29 +257,89 @@ void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE
 					ray.origin    = mesh_data->vertices[v].position + mesh_data->vertices[v].normal * EPSILON;
 					ray.direction = samples[s].direction;
 
-					float distance = scene.trace(ray, indices, weight_u, weight_v, albedo);	
+					float distance = scene.trace(ray, indices, weight_u, weight_v, hit_mesh);	
 					assert(distance != INFINITY);
-					
+					assert(hit_mesh);
+
 					float weight_w = 1.0f - (weight_u + weight_v);
 
-					const glm::vec3 * transfer_coeffs_vertex0 = previous_bounce_transfer_coeffs + indices[0];
-					const glm::vec3 * transfer_coeffs_vertex1 = previous_bounce_transfer_coeffs + indices[1];
-					const glm::vec3 * transfer_coeffs_vertex2 = previous_bounce_transfer_coeffs + indices[2];
+					// previous_bounce_transfer_coeffs is an array that contains the transfer coefficients for all Meshes in the Scene in a contiguous array.
+					// To correctly index in it we need to use the transfer_coeffs_scene_offset of the Mesh we hit, and multiply the indices by its transfer_coeff_count.
+					const glm::vec3 * hit_transfer_coeffs_vertex0 = previous_bounce_transfer_coeffs + (indices[0] * hit_mesh->transfer_coeff_count + hit_mesh->transfer_coeffs_scene_offset);
+					const glm::vec3 * hit_transfer_coeffs_vertex1 = previous_bounce_transfer_coeffs + (indices[1] * hit_mesh->transfer_coeff_count + hit_mesh->transfer_coeffs_scene_offset);
+					const glm::vec3 * hit_transfer_coeffs_vertex2 = previous_bounce_transfer_coeffs + (indices[2] * hit_mesh->transfer_coeff_count + hit_mesh->transfer_coeffs_scene_offset);
 
-					// Sum reflected SH light for this vertex
-					// Lerp hit vertices SH vectors to get SH at hit point
-					for (int k = 0; k < transfer_coeff_count; k++) {
-						bounce_transfer_coeffs[v * transfer_coeff_count + k] += albedo * dot * (
-							weight_u * transfer_coeffs_vertex0[k] + 
-							weight_v * transfer_coeffs_vertex1[k] + 
-							weight_w * transfer_coeffs_vertex2[k]
-						);
+					if (material.shader.type == MeshShader::Type::DIFFUSE && hit_mesh->material.shader.type == MeshShader::Type::DIFFUSE) {
+						glm::vec3 hit_albedo = hit_mesh->material.diffuse_colour * ONE_OVER_PI;
+
+						// Sum reflected SH light for this vertex
+						// Lerp hit vertices SH vectors to get SH at hit point
+						for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+							bounce_transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] += hit_albedo * dot * (
+								weight_u * hit_transfer_coeffs_vertex0[i] + 
+								weight_v * hit_transfer_coeffs_vertex1[i] + 
+								weight_w * hit_transfer_coeffs_vertex2[i]
+							);
+						}
+					} else if (material.shader.type == MeshShader::Type::GLOSSY && hit_mesh->material.shader.type == MeshShader::Type::GLOSSY) {
+						glm::vec3 hit_normal0 = hit_mesh->mesh_data->vertices[indices[0]].normal;
+						glm::vec3 hit_normal1 = hit_mesh->mesh_data->vertices[indices[1]].normal;
+						glm::vec3 hit_normal2 = hit_mesh->mesh_data->vertices[indices[2]].normal;
+
+						// Calculate actual hit normal by blending the normals using the barycentric u,v,w coordinates
+						glm::vec3 hit_normal = weight_u * hit_normal0 + weight_v * hit_normal1 + weight_w * hit_normal2;
+
+						// Obtain reflection direction R
+						glm::vec3 R = glm::reflect(-ray.direction, hit_normal);
+
+						// Convert reflection direction R into spherical coordinates (R_theta, R_phi)
+						float R_theta       = acos(R.z);
+						float inv_sin_theta = 1.0f / sin(R_theta);
+						float R_phi         = acos(glm::clamp(R.x * inv_sin_theta, -1.0f, 1.0f));
+	
+						// Keep phi in the range [0, 2 pi]
+						if (R.y * inv_sin_theta < 0.0f) {
+							R_phi = 2.0f * PI - R_phi;
+						}
+
+						// Evaluate SH coefficients in the reflection direction R
+						float y_R[SH_COEFFICIENT_COUNT];
+						for (int l = 0; l < SH_NUM_BANDS; l++) {
+							for (int m = -l; m <= l; m++) {
+								int k = l*(l+1) + m;
+
+								y_R[k] = SH::evaluate(l, m, R_theta, R_phi);
+							}
+						}
+
+						for (int j = 0; j < SH_COEFFICIENT_COUNT; j++) {
+							for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
+								glm::vec3 k_sum(0.0f, 0.0f, 0.0f);
+
+								int k = 0;
+								for (int l = 0; l < SH_NUM_BANDS; l++) {
+									for (int m = -l; m <= l; m++) {
+										glm::vec3 M_kj = 
+											weight_u * hit_transfer_coeffs_vertex0[k * SH_COEFFICIENT_COUNT + j] +
+											weight_v * hit_transfer_coeffs_vertex1[k * SH_COEFFICIENT_COUNT + j] +
+											weight_w * hit_transfer_coeffs_vertex2[k * SH_COEFFICIENT_COUNT + j];
+
+										k_sum += hit_mesh->material.brdf_coeffs[l] * M_kj * y_R[k];
+										k++;
+									}
+								}
+
+								bounce_transfer_coeffs[(v * SH_COEFFICIENT_COUNT + j) * SH_COEFFICIENT_COUNT + i] += k_sum * samples[s].coeffs[i];
+							}
+						}
+					} else {
+						// Currently unsupported :(
 					}
 				}
 			}
 		}
 		
-		//printf("Bounce n: Vertex %u out of %u done\n", i, vertex_count);
+		printf("Bounce n: Vertex %u out of %u done\n", v, vertex_count);
 	}
 	
 	const float normalization_factor = 4.0f * PI / SAMPLE_COUNT;
@@ -283,35 +381,6 @@ void Mesh::init_shader(const SH::Sample samples[SAMPLE_COUNT]) {
 	// Afer uploading this data to the GPU it can be removed from CPU RAM
 	delete[] vertices;
 	delete[] transfer_coeffs;
-
-	// For GLOSSY materials, we need to convolve with a BRDF (Phong lobe)
-	// We compute this here and pass it to the Shader
-	if (material.shader.type == MeshShader::Type::GLOSSY) {	
-		// Specular lobe function
-		// NOTE: This function depends only on theta, allowing for fast convolution with this kernel
-		SH::PolarFunction specular_lobe = [](float theta, float phi) {
-			const float spec = 1.0f;
-
-			float dot = cos(theta);
-
-			if (dot > 0.0f) return glm::vec3(pow(dot, spec));
-		
-			return glm::vec3(0.0f);
-		};
-
-		// Project the BRDF into Spherical Harmonic representation using Monte Carlo integration
-		glm::vec3 brdf_coeffs_full[SH_COEFFICIENT_COUNT];
-		for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-			brdf_coeffs_full[i] = glm::vec3(0.0f, 0.0f, 0.0f);
-		}
-		SH::project_polar_function(specular_lobe, SAMPLE_COUNT, samples, brdf_coeffs_full);
-
-		// Because the kernel is only dependend on theta, we can condense it into a representation with only 
-		// SH_NUM_BANDS coefficients instead of the normal SH_NUM_BANDS x SH_NUM_BANDS coefficients.
-		for (int l = 0; l < SH_NUM_BANDS; l++) {
-			material.brdf_coeffs[l] = sqrt(4.0f * PI / (2.0f * l + 1.0f)) * brdf_coeffs_full[l*(l + 1)];
-		}
-	}
 }
 
 bool Mesh::intersects(const Ray& ray) const {
