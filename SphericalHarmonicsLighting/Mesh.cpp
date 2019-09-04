@@ -130,7 +130,7 @@ void Mesh::init_material(const SH::Sample samples[SAMPLE_COUNT]) {
 	}
 }
 
-bool Mesh::try_to_load_transfer_coeffs(glm::vec3 transfer_coeffs[]) {
+bool Mesh::try_to_load_transfer_coeffs(glm::vec3 transfer_coeffs[]) const {
 	bool was_loaded = false;
 
 	std::ifstream in_file(transfer_coeffs_file_name, std::ios::in | std::ios::binary); 
@@ -241,7 +241,7 @@ void Mesh::init_light_direct(const Scene& scene, const SH::Sample samples[SAMPLE
 	}
 }
 
-void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE_COUNT], const glm::vec3 previous_bounce_transfer_coeffs[], glm::vec3 bounce_transfer_coeffs[]) {
+void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE_COUNT], const glm::vec3 previous_bounce_transfer_coeffs[], glm::vec3 bounce_transfer_coeffs[]) const {
 	Ray ray;
 	
 	int indices[3];

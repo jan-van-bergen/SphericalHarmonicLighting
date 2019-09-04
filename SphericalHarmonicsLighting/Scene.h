@@ -57,12 +57,12 @@ public:
 
 	Mesh(const char* file_name, const MeshShader& shader);
 
-	bool try_to_load_transfer_coeffs(glm::vec3 transfer_coeffs[]);
+	bool try_to_load_transfer_coeffs(glm::vec3 transfer_coeffs[]) const;
 	void        save_transfer_coeffs(glm::vec3 transfer_coeffs[]) const;
 
 	void init_material(const SH::Sample[SAMPLE_COUNT]);
 	void init_light_direct(const Scene& scene, const SH::Sample[SAMPLE_COUNT], glm::vec3 transfer_coeffs[]);
-	void init_light_bounce(const Scene& scene, const SH::Sample[SAMPLE_COUNT], const glm::vec3 previous_bounce_transfer_coeffs[], glm::vec3 bounce_transfer_coeffs[]);
+	void init_light_bounce(const Scene& scene, const SH::Sample[SAMPLE_COUNT], const glm::vec3 previous_bounce_transfer_coeffs[], glm::vec3 bounce_transfer_coeffs[]) const;
 	void init_shader(const SH::Sample[SAMPLE_COUNT], glm::vec3 transfer_coeffs[]);
 
 	bool  intersects(const Ray& ray) const;
