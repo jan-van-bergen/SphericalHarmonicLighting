@@ -5,6 +5,7 @@ An experimental project to explore global illumination techniques that use Spher
 ### Features
 * Radiance is calulcated per vertex. The transfer function takes into account the surface normal for direct diffuse lighting. It also takes into account indirect shadowing. This is achieved by performing a raytracing precalculation step.
 * Glossy BDRF support.
+* Interreflection, called Self-Transfer in the original paper but in this implementation different objects can affect each others transfer functions.
 * Raytracing is accelerated using a KD Tree.
 * Spherical Harmonic coefficients can be efficiently rotated using recurrence relations as described in a paper by Ivanic.
 * Lighting is performed on the GPU. The Spherical Harmonic coefficients are stored in a Texture Buffer Object.
@@ -30,6 +31,16 @@ Rendered using the Grace Cathedral light probe.
 Rendered using the Grace Cathedral light probe.
 
 ![HDR Probe Glossy](Doc/Glossy.png "HDR Probe Glossy")
+
+# Diffuse Interreflection
+Note the ambient lighting that is being reflected from the green cube and the red floor onto the monkey head.
+
+![Diffuse Self Transfer](Doc/Diffuse Self Transfer 2.png "Diffuse Self Transfer")
+
+# Glossy Interreflection
+Note the ambient lighting that is being reflected from the green cube and the red floor onto the monkey head.
+
+![Glossy Interreflection](Doc/Glossy Interreflection.png "Glossy Interreflection")
 
 # KD Tree
 A debug rendering of the KD Tree structure used to raytrace the monkey head mesh.
