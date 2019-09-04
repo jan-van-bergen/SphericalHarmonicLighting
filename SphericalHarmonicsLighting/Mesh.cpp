@@ -40,35 +40,40 @@ Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_nam
 		triangles[i].plane.distance = -glm::dot(triangles[i].plane.normal, triangles[i].vertices[0]);
 	}
 
-	transfer_coeffs_file_name = new char[1024];
+	// Decide in which file to look for the transfer coefficients, 
+	// based on whether the Mesh uses a DIFFUSE or GLOSSY MeshShader
+	{
+		transfer_coeffs_file_name = new char[1024];
 
-	u32 file_name_length = strlen(file_name);
-	strcpy_s(transfer_coeffs_file_name, file_name_length + 1, file_name);
+		u32 file_name_length = strlen(file_name);
+		strcpy_s(transfer_coeffs_file_name, file_name_length + 1, file_name);
 
-	int last_dot_index = StringHelper::last_index_of(".", transfer_coeffs_file_name);
-	assert(last_dot_index != INVALID);
+		int last_dot_index = StringHelper::last_index_of(".", transfer_coeffs_file_name);
+		assert(last_dot_index != INVALID);
 
-	transfer_coeff_count = INVALID;
-	switch (material.shader.type) {
-		case MeshShader::Type::DIFFUSE: {
-			// For diffuse transfer functions we use a SH_COEFFICIENT_COUNT dimensional vector
-			transfer_coeff_count = SH_COEFFICIENT_COUNT;
+		transfer_coeff_count = INVALID;
+		switch (material.shader.type) {
+			case MeshShader::Type::DIFFUSE: {
+				// For diffuse transfer functions we use a SH_COEFFICIENT_COUNT dimensional vector
+				transfer_coeff_count = SH_COEFFICIENT_COUNT;
 
-			const char * diffuse_str = "_diffuse.dat";
-			strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(diffuse_str) + 1, diffuse_str);
-		} break;
+				const char * diffuse_str = "_diffuse.dat";
+				strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(diffuse_str) + 1, diffuse_str);
+			} break;
 
-		case MeshShader::Type::GLOSSY: {
-			// For glossy transfer functions we use a SH_COEFFICIENT_COUNT x SH_COEFFICIENT_COUNT matrix
-			transfer_coeff_count = SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT;
+			case MeshShader::Type::GLOSSY: {
+				// For glossy transfer functions we use a SH_COEFFICIENT_COUNT x SH_COEFFICIENT_COUNT matrix
+				transfer_coeff_count = SH_COEFFICIENT_COUNT * SH_COEFFICIENT_COUNT;
 
-			const char * glossy_str = "_glossy.dat";
-			strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(glossy_str) + 1, glossy_str);
-		} break;
+				const char * glossy_str = "_glossy.dat";
+				strcpy_s(transfer_coeffs_file_name + last_dot_index, strlen(glossy_str) + 1, glossy_str);
+			} break;
 
-		default: abort();
+			default: abort();
+		}
 	}
 	
+	// Build KD Tree for this Mesh
 	{
 		ScopedTimer timer("KD Tree Construction");
 
@@ -92,12 +97,14 @@ void Mesh::init_material(const SH::Sample samples[SAMPLE_COUNT]) {
 	if (material.shader.type == MeshShader::Type::GLOSSY) {	
 		struct Phong_BRDF {
 			float     specular_power;
-			glm::vec3 diffuse_colour;
+			glm::vec3 albedo;
 
 			inline glm::vec3 operator() (float theta, float phi) {
+				// Dot of two unit vector is the cosine of the angle between them.
+				// In polar coordinates this angle is simply the azimuthal angle theta.
 				float dot = cos(theta);
 
-				if (dot > 0.0f) return diffuse_colour * glm::vec3(pow(dot, specular_power));
+				if (dot > 0.0f) return albedo * glm::vec3(pow(dot, specular_power));
 		
 				return glm::vec3(0.0f, 0.0f, 0.0f);
 			}
@@ -105,7 +112,7 @@ void Mesh::init_material(const SH::Sample samples[SAMPLE_COUNT]) {
 		
 		Phong_BRDF brdf;
 		brdf.specular_power = material.specular_power;
-		brdf.diffuse_colour = material.albedo;
+		brdf.albedo         = material.albedo;
 
 		glm::vec3 brdf_coeffs_full[SH_COEFFICIENT_COUNT];
 		for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
@@ -151,8 +158,8 @@ bool Mesh::try_to_load_transfer_coeffs(glm::vec3 transfer_coeffs[]) {
 }
 
 void Mesh::save_transfer_coeffs(glm::vec3 transfer_coeffs[]) const {
-	assert(transfer_coeffs_file_name);
 	assert(transfer_coeffs);
+	assert(transfer_coeffs_file_name);
 
 	// Save the coefficients to a file so that they can be reloaded at a later time
 	std::ofstream out_file(transfer_coeffs_file_name, std::ios::out | std::ios::binary | std::ios::trunc);
@@ -170,8 +177,6 @@ void Mesh::save_transfer_coeffs(glm::vec3 transfer_coeffs[]) const {
 }
 
 void Mesh::init_light_direct(const Scene& scene, const SH::Sample samples[SAMPLE_COUNT], glm::vec3 transfer_coeffs[]) {
-	const int index_count  = mesh_data->index_count;
-
 	ScopedTimer timer("Mesh Direct + Shadowed Lighting");
 
 	Ray ray;
