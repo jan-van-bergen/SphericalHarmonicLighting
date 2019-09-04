@@ -270,12 +270,12 @@ void Mesh::init_light_bounce(const Scene& scene, const SH::Sample samples[SAMPLE
 					const glm::vec3 * hit_transfer_coeffs_vertex2 = previous_bounce_transfer_coeffs + (indices[2] * hit_mesh->transfer_coeff_count + hit_mesh->transfer_coeffs_scene_offset);
 
 					if (material.shader.type == MeshShader::Type::DIFFUSE && hit_mesh->material.shader.type == MeshShader::Type::DIFFUSE) {
-						glm::vec3 hit_albedo = hit_mesh->material.albedo * ONE_OVER_PI;
+						glm::vec3 albedo = material.albedo * ONE_OVER_PI;
 
 						// Sum reflected SH light for this vertex
 						// Lerp hit vertices SH vectors to get SH at hit point
 						for (int i = 0; i < SH_COEFFICIENT_COUNT; i++) {
-							bounce_transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] += hit_albedo * dot * (
+							bounce_transfer_coeffs[v * SH_COEFFICIENT_COUNT + i] += albedo * dot * (
 								weight_u * hit_transfer_coeffs_vertex0[i] + 
 								weight_v * hit_transfer_coeffs_vertex1[i] + 
 								weight_w * hit_transfer_coeffs_vertex2[i]
