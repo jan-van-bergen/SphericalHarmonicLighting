@@ -107,8 +107,7 @@ void replace_defines_and_add(ChunkBuffer<char>& source, int length, const char *
 						goto Exit_Definition_Loop;
 					}
 				}
-			}
-		Exit_Definition_Loop:;
+			} Exit_Definition_Loop:;
 		}
 	}
 
