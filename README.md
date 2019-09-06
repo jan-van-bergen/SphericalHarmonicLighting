@@ -56,6 +56,8 @@ Because the SH transfer coefficients are calulcated per-vertex, interesting patt
 ### Building
 The project should work out of the box with Visual Studio 2017 or above.
 
+The program makes use of `.dat` files to store the transfer coefficients of each model. These files are not included in the git repository and will be reconstructed upon running the program for the first time. This process might take a little while to complete.
+
 ### Dependencies
 * Assimp
 * GLEW
