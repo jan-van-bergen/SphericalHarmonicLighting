@@ -43,6 +43,20 @@ float factorial[34] = {
 	8683317618811886495518194401280000000.0f
 };
 
+float K[SH_COEFFICIENT_COUNT];
+
+// Renormalisation constant for SH function
+void init_K() {
+	for (int l = 0; l < SH_NUM_BANDS; l++) {
+		for (int m = -l; m <= l; m++) {
+			K[l*(l+1) + m] = sqrt(
+				((2.0f * l + 1.0f) * factorial[l - m]) / 
+				(4.0f * PI * factorial[l + m])
+			);
+		}
+	}
+}
+
 // Evaluates the Associated Legendre Polynomial P(l,m,x) at x
 float P(int l, int m, float x) {	
 	// Apply rule 2; P m m
@@ -75,21 +89,13 @@ float P(int l, int m, float x) {
 	return pll;
 }
 
-// Renormalisation constant for SH function
-float K(int l, int m) {
-	return sqrt(
-		((2.0f * l + 1.0f) * factorial[l - m]) / 
-		(4.0f * PI * factorial[l + m])
-	);
-}
-
 float SH::evaluate(int l, int m, float theta, float phi) {
 	if (m == 0) {
-		return K(l, 0) * P(l, m, cos(theta));
+		return K[l*(l + 1)] * P(l, m, cos(theta));
 	} else if(m > 0) {
-		return sqrt(2.0f) * K(l,  m) * cos( m * phi) * P(l,  m, cos(theta));
+		return sqrt(2.0f) * K[l*(l+1) + m] * cos( m * phi) * P(l,  m, cos(theta));
 	} else {
-		return sqrt(2.0f) * K(l, -m) * sin(-m * phi) * P(l, -m, cos(theta));
+		return sqrt(2.0f) * K[l*(l+1) - m] * sin(-m * phi) * P(l, -m, cos(theta));
 	}
 } 
 
@@ -99,6 +105,8 @@ void SH::init_samples(Sample samples[SAMPLE_COUNT]) {
 	std::random_device random_device;
 	std::mt19937 gen(random_device());
 	std::uniform_real_distribution<float> U01(0.0f, 1.0f);
+
+	init_K();
 
 	for (int i = 0; i < SQRT_SAMPLE_COUNT; i++) {
 		for (int j = 0; j < SQRT_SAMPLE_COUNT; j++) {
