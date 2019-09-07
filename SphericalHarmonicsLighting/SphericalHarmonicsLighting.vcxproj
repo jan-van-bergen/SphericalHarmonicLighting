@@ -213,7 +213,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SHRotation.cpp" />
-    <ClCompile Include="SphericalSamples.cpp" />
+    <ClCompile Include="SphericalHarmonics.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="StringHelper.cpp" />
     <ClCompile Include="VectorMath.cpp" />

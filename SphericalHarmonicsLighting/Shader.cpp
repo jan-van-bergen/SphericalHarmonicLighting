@@ -69,7 +69,7 @@ Shader::~Shader() {
 
 	glDeleteProgram(program_id);
 }
-
+ 
 void replace_defines_and_add(ChunkBuffer<char>& source, int length, const char * src, const Shader::Defines& defines) {
 	// Index that indicates where we should currently start copying
 	int start = 0;
