@@ -83,26 +83,26 @@ bool Ray::intersects(const AABB& aabb) const {
 	float inv_direction_z = 1.0f / direction.z;
 
 	float tmin = (aabb.min.x - origin.x) * inv_direction_x; 
-    float tmax = (aabb.max.x - origin.x) * inv_direction_x; 
+	float tmax = (aabb.max.x - origin.x) * inv_direction_x; 
  
-    if (tmin > tmax) std::swap(tmin, tmax); 
+	if (tmin > tmax) std::swap(tmin, tmax); 
  
-    float tymin = (aabb.min.y - origin.y) * inv_direction_y; 
-    float tymax = (aabb.max.y - origin.y) * inv_direction_y; 
+	float tymin = (aabb.min.y - origin.y) * inv_direction_y; 
+	float tymax = (aabb.max.y - origin.y) * inv_direction_y; 
  
-    if (tymin > tymax) std::swap(tymin, tymax); 
+	if (tymin > tymax) std::swap(tymin, tymax); 
  
-    if ((tmin > tymax) || (tymin > tmax)) return false; 
+	if ((tmin > tymax) || (tymin > tmax)) return false; 
  
-    if (tymin > tmin) tmin = tymin; 
-    if (tymax < tmax) tmax = tymax; 
+	if (tymin > tmin) tmin = tymin; 
+	if (tymax < tmax) tmax = tymax; 
  
-    float tzmin = (aabb.min.z - origin.z) * inv_direction_z; 
-    float tzmax = (aabb.max.z - origin.z) * inv_direction_z; 
+	float tzmin = (aabb.min.z - origin.z) * inv_direction_z; 
+	float tzmax = (aabb.max.z - origin.z) * inv_direction_z; 
  
-    if (tzmin > tzmax) std::swap(tzmin, tzmax); 
+	if (tzmin > tzmax) std::swap(tzmin, tzmax); 
  
-    if ((tmin > tzmax) || (tzmin > tmax)) return false; 
+	if ((tmin > tzmax) || (tzmin > tmax)) return false; 
  
-    return true;
+	return true;
 }
