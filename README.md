@@ -21,7 +21,7 @@ Note the soft shadow being cast from the monkey head onto the ground.
 # HDR Probe Diffuse Lighting
 Rendered using the Grace Cathedral light probe.
 
-![HDR Probe Lighting](ScreenShots/HDR Light_Probe.png "HDR Probe Lighting")
+![HDR Probe Lighting](ScreenShots/HDR_Light_Probe.png "HDR Probe Lighting")
 
 # Default Glossy Lighting
 
