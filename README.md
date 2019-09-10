@@ -4,7 +4,7 @@ An experimental project to explore global illumination techniques that use Spher
 
 ### Features
 * Radiance is calulcated per vertex. The transfer function takes into account the surface normal for direct diffuse lighting. It also takes into account indirect shadowing. This is achieved by performing a raytracing precalculation step.
-* Glossy BDRF support.
+* Diffuse as well as Glossy BDRF support.
 * Interreflection, called Self-Transfer in the original paper but in this implementation different objects can affect each others transfer functions.
 * Raytracing is accelerated using a KD Tree.
 * Spherical Harmonic coefficients can be efficiently rotated using recurrence relations as described in a paper by Ivanic.
@@ -21,7 +21,7 @@ Note the soft shadow being cast from the monkey head onto the ground.
 # HDR Probe Diffuse Lighting
 Rendered using the Grace Cathedral light probe.
 
-![HDR Probe Lighting](ScreenShots/HDR Light_Probe.png "HDR Probe Lighting")
+![HDR Probe Lighting](ScreenShots/HDR_Light_Probe.png "HDR Probe Lighting")
 
 # Default Glossy Lighting
 
@@ -46,12 +46,6 @@ Note the ambient lighting that is being reflected from the green cube and the re
 A debug rendering of the KD Tree structure used to raytrace the monkey head mesh.
 
 ![KD Tree](ScreenShots/KD_Tree.png "KD Tree")
-
-# Glitches
-Because the SH transfer coefficients are calulcated per-vertex, interesting patterns can arise when these coefficients are fed incorrectly to the Vertex Shader:
-
-![Glitch](ScreenShots/SH_Lighting_Glitch.png "Glitch")
-![Glitch](ScreenShots/SH_Lighting_Glitch_2.png "Glitch")
 
 ### Building
 The project should work out of the box with Visual Studio 2017 or above.
