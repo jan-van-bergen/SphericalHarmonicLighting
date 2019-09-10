@@ -16,42 +16,42 @@ An experimental project to explore global illumination techniques that use Spher
 # Default Diffuse Lighting
 Note the soft shadow being cast from the monkey head onto the ground.
 
-![Default Lighting](Doc/Default Light.png "Default Lighting")
+![Default Lighting](ScreenShots/Default_Light.png "Default Lighting")
 
 # HDR Probe Diffuse Lighting
 Rendered using the Grace Cathedral light probe.
 
-![HDR Probe Lighting](Doc/HDR Light Probe.png "HDR Probe Lighting")
+![HDR Probe Lighting](ScreenShots/HDR Light_Probe.png "HDR Probe Lighting")
 
 # Default Glossy Lighting
 
-![Default Glossy](Doc/Glossy 2.png "Default Glossy")
+![Default Glossy](ScreenShots/Glossy_2.png "Default Glossy")
 
 # HDR Probe Glossy Lighting
 Rendered using the Grace Cathedral light probe.
 
-![HDR Probe Glossy](Doc/Glossy.png "HDR Probe Glossy")
+![HDR Probe Glossy](ScreenShots/Glossy.png "HDR Probe Glossy")
 
 # Diffuse Interreflection
 Note the ambient lighting that is being reflected from the green cube and the red floor onto the monkey head.
 
-![Diffuse Self Transfer](Doc/Diffuse Self Transfer 2.png "Diffuse Self Transfer")
+![Diffuse Self Transfer](ScreenShots/Diffuse_Self_Transfer_2.png "Diffuse Self Transfer")
 
 # Glossy Interreflection
 Note the ambient lighting that is being reflected from the green cube and the red floor onto the monkey head.
 
-![Glossy Interreflection](Doc/Glossy Interreflection.png "Glossy Interreflection")
+![Glossy Interreflection](ScreenShots/Glossy_Interreflection.png "Glossy Interreflection")
 
 # KD Tree
 A debug rendering of the KD Tree structure used to raytrace the monkey head mesh.
 
-![KD Tree](Doc/KD Tree.png "KD Tree")
+![KD Tree](ScreenShots/KD_Tree.png "KD Tree")
 
 # Glitches
 Because the SH transfer coefficients are calulcated per-vertex, interesting patterns can arise when these coefficients are fed incorrectly to the Vertex Shader:
 
-![Glitch](Doc/SH Lighting Glitch.png "Glitch")
-![Glitch](Doc/SH Lighting Glitch 2.png "Glitch")
+![Glitch](ScreenShots/SH_Lighting_Glitch.png "Glitch")
+![Glitch](ScreenShots/SH_Lighting_Glitch_2.png "Glitch")
 
 ### Building
 The project should work out of the box with Visual Studio 2017 or above.
