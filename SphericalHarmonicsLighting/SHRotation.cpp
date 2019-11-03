@@ -43,7 +43,7 @@ private:
 	float data[4 * SH_NUM_BANDS*SH_NUM_BANDS + 4*SH_NUM_BANDS + 1]; // Upper bound, derived by expanding (2l+1) * (2l+1)
 };
 
-// Kronecker Delta, 1 if the supplied indices are the same, 0 ortherwise
+// Kronecker Delta, 1 if the supplied indices are the same, 0 otherwise
 #define DELTA(i, j) (i==j ? 1.0f : 0.0f)
 
 // Formula for the size of the precalulated arrays for u,v,w
