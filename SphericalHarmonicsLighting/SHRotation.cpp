@@ -47,7 +47,7 @@ private:
 #define DELTA(i, j) (i==j ? 1.0f : 0.0f)
 
 // Formula for the size of the precalulated arrays for u,v,w
-// Derivd by expanding the summation: \sum_{l=0}^{b-1} (2l+1) (2l+1)
+// Derived by expanding the summation: \sum_{l=0}^{b-1} (2l+1) (2l+1)
 #define SH_ARRAY_COUNT (2*SH_NUM_BANDS * (SH_NUM_BANDS - 1) * (2*SH_NUM_BANDS - 1)) / 3 + 2*SH_NUM_BANDS*SH_NUM_BANDS - SH_NUM_BANDS
 
 // Precalculated arrays to avoid having to calculate the u,v,w functions every time
