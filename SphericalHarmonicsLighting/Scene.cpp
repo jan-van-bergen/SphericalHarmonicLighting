@@ -191,18 +191,18 @@ bool Scene::intersects(const Ray& ray) const {
 float Scene::trace(const Ray& ray, int indices[3], float& u, float& v, const Mesh *& mesh) const {
 	float min_distance = INFINITY;
 
-	int   _indices[3];
-	float _u;
-	float _v;
+	int   current_indices[3];
+	float current_u;
+	float current_v;
 
 	for (int m = 0; m < mesh_count; m++) {
-		float distance = meshes[m].trace(ray, _indices, _u, _v);
+		float distance = meshes[m].trace(ray, current_indices, current_u, current_v);
 		if (distance < min_distance) {
 			min_distance = distance;
 
-			memcpy(indices, _indices, 3 * sizeof(int));
-			u = _u;
-			v = _v;
+			memcpy(indices, current_indices, 3 * sizeof(int));
+			u = current_u;
+			v = current_v;
 
 			mesh = &meshes[m];
 		}
