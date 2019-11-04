@@ -121,13 +121,13 @@ void Scene::init() {
 	delete[] samples;
 }
 
-void Scene::update(float delta, const u8* keys) {
+void Scene::update(float delta, const u8 * keys) {
 	const float movement_speed = 10.0f;
 	const float rotation_speed =  2.0f;
 
-	const glm::vec3& camera_right   = camera.orientation * glm::vec3(1.0f, 0.0f,  0.0f);
-	const glm::vec3& camera_up      = camera.orientation * glm::vec3(0.0f, 1.0f,  0.0f);
-	const glm::vec3& camera_forward = camera.orientation * glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 camera_right   = camera.orientation * glm::vec3(1.0f, 0.0f,  0.0f);
+	glm::vec3 camera_up      = camera.orientation * glm::vec3(0.0f, 1.0f,  0.0f);
+	glm::vec3 camera_forward = camera.orientation * glm::vec3(0.0f, 0.0f, -1.0f);
 
 	if (keys[SDL_SCANCODE_W]) camera.position += camera_forward * movement_speed * delta;
 	if (keys[SDL_SCANCODE_A]) camera.position -= camera_right   * movement_speed * delta;
@@ -178,7 +178,7 @@ void Scene::debug(GLuint uni_debug_view_projection) const {
 	}
 }
 
-bool Scene::intersects(const Ray& ray) const {
+bool Scene::intersects(const Ray & ray) const {
 	for (int i = 0; i < mesh_count; i++) {
 		if (meshes[i].intersects(ray)) {
 			return true;
@@ -188,7 +188,7 @@ bool Scene::intersects(const Ray& ray) const {
 	return false;
 }
 
-float Scene::trace(const Ray& ray, int indices[3], float& u, float& v, const Mesh *& mesh) const {
+float Scene::trace(const Ray & ray, int indices[3], float & u, float & v, const Mesh *& mesh) const {
 	float min_distance = INFINITY;
 
 	int   current_indices[3];
