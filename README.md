@@ -28,7 +28,7 @@ Rendered using the Grace Cathedral light probe.
 ![Default Glossy](ScreenShots/Glossy_2.png "Default Glossy")
 
 # HDR Probe Glossy Lighting
-Rendered using the Grace Cathedral light probe.
+Rendered using the [Grace Cathedral light probe](https://www.pauldebevec.com/Probes/).
 
 ![HDR Probe Glossy](ScreenShots/Glossy.png "HDR Probe Glossy")
 
