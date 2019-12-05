@@ -6,7 +6,7 @@ An experimental project to explore global illumination techniques that use Spher
 * Radiance is calulcated per vertex. The transfer function takes into account the surface normal for direct diffuse lighting. It also takes into account indirect shadowing. This is achieved by performing a raytracing precalculation step.
 * Diffuse as well as Glossy BDRF support.
 * Interreflection, called Self-Transfer in the original paper but in this implementation different objects can affect each others transfer functions.
-* Raytracing is accelerated using a KD Tree.
+* Raytracing is accelerated using a BVH.
 * Spherical Harmonic coefficients can be efficiently rotated using recurrence relations as described in a paper by Ivanic.
 * Lighting is performed on the GPU. The Spherical Harmonic coefficients are stored in a Texture Buffer Object.
 * The engine supports two different types of Light. The first is a simple directional light, the calculation of which is fully synthetic. The second is a probe light, which is based on a provided light probe image, such as those found at <http://www.pauldebevec.com/Probes>.
@@ -42,10 +42,10 @@ Note the ambient lighting that is being reflected from the green cube and the re
 
 ![Glossy Interreflection](ScreenShots/Glossy_Interreflection.png "Glossy Interreflection")
 
-# KD Tree
-A debug rendering of the KD Tree structure used to raytrace the monkey head mesh.
+# BVH
+A debug rendering of the BVH (Bounding Volume Hierarchy) structure used to raytrace the monkey head mesh.
 
-![KD Tree](ScreenShots/KD_Tree.png "KD Tree")
+![BVH](ScreenShots/BVH.png "BVH")
 
 ### Building
 The project should work out of the box with Visual Studio 2017 or above.
