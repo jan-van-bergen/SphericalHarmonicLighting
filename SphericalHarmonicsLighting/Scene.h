@@ -7,7 +7,7 @@
 #include "AssetLoader.h"
 
 #include "Ray.h"
-#include "KDTree.h"
+#include "BVH.h"
 
 #include "Light.h"
 
@@ -35,8 +35,8 @@ private:
 	
 	char * transfer_coeffs_file_name;
 
-	KD_Node *        kd_tree;
-	KD_Node_Debugger kd_tree_debugger;
+	BVHNode const * bvh;
+	BVHDebugger     bvh_debugger;
 	
 	GLuint vbo;
 	GLuint ibo;
@@ -95,8 +95,8 @@ public:
 
 	void debug(GLuint uni_debug_view_projection) const;
 
-	bool  intersects(const Ray& ray) const;
-	float trace     (const Ray& ray, int indices[3], float& u, float& v, const Mesh *& mesh) const;
+	bool  intersects(const Ray & ray) const;
+	float trace     (const Ray & ray, int indices[3], float& u, float& v, const Mesh *& mesh) const;
 
 private:
 	const DiffuseShader shader_diffuse;

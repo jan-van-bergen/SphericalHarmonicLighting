@@ -184,7 +184,7 @@
     <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="ChunkBuffer.h" />
     <ClInclude Include="Display.h" />
-    <ClInclude Include="KDTree.h" />
+    <ClInclude Include="BVH.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="MeshShaders.h" />
     <ClInclude Include="Ray.h" />
@@ -205,8 +205,8 @@
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="GlossyShader.cpp" />
     <ClCompile Include="HDRProbeLight.cpp" />
-    <ClCompile Include="KDNodeDebugger.cpp" />
-    <ClCompile Include="KDTree.cpp" />
+    <ClCompile Include="BVHDebugger.cpp" />
+    <ClCompile Include="BVH.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />

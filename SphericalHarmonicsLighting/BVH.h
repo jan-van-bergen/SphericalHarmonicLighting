@@ -5,26 +5,26 @@
 
 #include "Types.h"
 
-struct KD_Node {
+struct BVHNode {
 public:
 	AABB aabb;
 	
-	KD_Node * left;
-	KD_Node * right;
+	BVHNode const * left;
+	BVHNode const * right;
 
 	int               triangle_count;
 	Triangle const ** triangles;
 
-	KD_Node();
-	~KD_Node();
+	BVHNode();
+	~BVHNode();
 
 	bool  intersects(const Ray& ray) const;
 	float trace     (const Ray& ray, int indices[3], float& u, float& v) const;
 
-	static KD_Node* build(int triangle_count, Triangle const * const triangles[]);
+	static BVHNode const * build(int triangle_count, Triangle const * const triangles[]);
 };
 
-struct KD_Node_Debugger {
+struct BVHDebugger {
 private:
 	Array<glm::vec3> positions;
 	Array<u32>       indices;
@@ -33,10 +33,10 @@ private:
 	GLuint ibo;
 	u32 index_count;
 
-	void init_tree(const KD_Node * kd_node);
+	void init_tree(const BVHNode * bvh_node);
 
 public:
-	void init(const KD_Node * root);
+	void init(const BVHNode * root);
 
 	void draw() const;
 };

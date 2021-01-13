@@ -1,8 +1,8 @@
-#include "KDTree.h"
+#include "BVH.h"
 
 #define TERMINATION_SIZE 2
 
-KD_Node::KD_Node() {
+BVHNode::BVHNode() {
 	aabb.min = glm::vec3(+INFINITY);
 	aabb.max = glm::vec3(-INFINITY);
 
@@ -13,7 +13,7 @@ KD_Node::KD_Node() {
 	triangles      = NULL;
 }
 
-KD_Node::~KD_Node() {
+BVHNode::~BVHNode() {
 	if (left) {
 		delete left;
 		delete right;
@@ -24,7 +24,7 @@ KD_Node::~KD_Node() {
 	}
 }
 
-bool KD_Node::intersects(const Ray& ray) const {
+bool BVHNode::intersects(const Ray& ray) const {
 	if (ray.intersects(aabb)) {
 		if (left) { // If the left node pointer is non-null, we are not in a leaf node and need to recurse
 			assert(triangles == NULL);
@@ -45,7 +45,7 @@ bool KD_Node::intersects(const Ray& ray) const {
 	return false;
 }
 
-float KD_Node::trace(const Ray& ray, int indices[3], float& u, float& v) const {
+float BVHNode::trace(const Ray & ray, int indices[3], float& u, float& v) const {
 	float min_distance = INFINITY;
 
 	if (ray.intersects(aabb)) {
@@ -97,8 +97,8 @@ float KD_Node::trace(const Ray& ray, int indices[3], float& u, float& v) const {
 	return min_distance;
 }
 
-KD_Node * KD_Node::build(int triangle_count, Triangle const * const triangles[]) {
-	KD_Node * node = new KD_Node();
+BVHNode const * BVHNode::build(int triangle_count, Triangle const * const triangles[]) {
+	BVHNode * node = new BVHNode();
 	node->triangle_count = triangle_count;
 
 	// @TODO: should check this in caller?

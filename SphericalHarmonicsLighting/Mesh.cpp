@@ -73,9 +73,9 @@ Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_nam
 		}
 	}
 	
-	// Build KD Tree for this Mesh
+	// Build BVH for this Mesh
 	{
-		ScopedTimer timer("KD Tree Construction");
+		ScopedTimer timer("BVH Construction");
 
 		Triangle const ** triangles_copy = new Triangle const *[triangle_count];
 		{
@@ -83,11 +83,11 @@ Mesh::Mesh(const char* file_name, const MeshShader& shader) : file_name(file_nam
 				triangles_copy[i] = &triangles[i];
 			}
 
-			kd_tree = KD_Node::build(triangle_count, triangles_copy);
+			bvh = BVHNode::build(triangle_count, triangles_copy);
 		}
 		delete[] triangles_copy;
 
-		kd_tree_debugger.init(kd_tree);
+		bvh_debugger.init(bvh);
 	}
 }
 
@@ -393,11 +393,11 @@ void Mesh::init_shader(const SH::Sample samples[SAMPLE_COUNT], glm::vec3 transfe
 }
 
 bool Mesh::intersects(const Ray& ray) const {
-	return kd_tree->intersects(ray);
+	return bvh->intersects(ray);
 }
 
 float Mesh::trace(const Ray& ray, int indices[3], float& u, float& v) const {
-	return kd_tree->trace(ray, indices, u, v);
+	return bvh->trace(ray, indices, u, v);
 }
 
 void Mesh::render() const {
@@ -426,5 +426,5 @@ void Mesh::render() const {
 }
 
 void Mesh::debug() const {
-	kd_tree_debugger.draw();
+	bvh_debugger.draw();
 }

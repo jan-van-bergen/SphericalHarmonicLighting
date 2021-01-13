@@ -1,16 +1,16 @@
-#include "KDTree.h"
+#include "BVH.h"
 
-void KD_Node_Debugger::init_tree(const KD_Node * kd_node) {
+void BVHDebugger::init_tree(const BVHNode * bvh_node) {
 	// Bottom 4 vertices
-	positions.push_back(glm::vec3(kd_node->aabb.min.x, kd_node->aabb.min.y, kd_node->aabb.min.z));
-	positions.push_back(glm::vec3(kd_node->aabb.max.x, kd_node->aabb.min.y, kd_node->aabb.min.z));
-	positions.push_back(glm::vec3(kd_node->aabb.max.x, kd_node->aabb.min.y, kd_node->aabb.max.z));
-	positions.push_back(glm::vec3(kd_node->aabb.min.x, kd_node->aabb.min.y, kd_node->aabb.max.z));
+	positions.push_back(glm::vec3(bvh_node->aabb.min.x, bvh_node->aabb.min.y, bvh_node->aabb.min.z));
+	positions.push_back(glm::vec3(bvh_node->aabb.max.x, bvh_node->aabb.min.y, bvh_node->aabb.min.z));
+	positions.push_back(glm::vec3(bvh_node->aabb.max.x, bvh_node->aabb.min.y, bvh_node->aabb.max.z));
+	positions.push_back(glm::vec3(bvh_node->aabb.min.x, bvh_node->aabb.min.y, bvh_node->aabb.max.z));
 	// Top 4 vertices
-	positions.push_back(glm::vec3(kd_node->aabb.min.x, kd_node->aabb.max.y, kd_node->aabb.min.z));
-	positions.push_back(glm::vec3(kd_node->aabb.max.x, kd_node->aabb.max.y, kd_node->aabb.min.z));
-	positions.push_back(glm::vec3(kd_node->aabb.max.x, kd_node->aabb.max.y, kd_node->aabb.max.z));
-	positions.push_back(glm::vec3(kd_node->aabb.min.x, kd_node->aabb.max.y, kd_node->aabb.max.z));
+	positions.push_back(glm::vec3(bvh_node->aabb.min.x, bvh_node->aabb.max.y, bvh_node->aabb.min.z));
+	positions.push_back(glm::vec3(bvh_node->aabb.max.x, bvh_node->aabb.max.y, bvh_node->aabb.min.z));
+	positions.push_back(glm::vec3(bvh_node->aabb.max.x, bvh_node->aabb.max.y, bvh_node->aabb.max.z));
+	positions.push_back(glm::vec3(bvh_node->aabb.min.x, bvh_node->aabb.max.y, bvh_node->aabb.max.z));
 	
 	int index_start = indices.size();
 
@@ -31,13 +31,13 @@ void KD_Node_Debugger::init_tree(const KD_Node * kd_node) {
 	indices.push_back(index_start + 3); indices.push_back(index_start + 7); 
 
 	// Recurse if the node has children
-	if (kd_node->left) {
-		init_tree(kd_node->left);
-		init_tree(kd_node->right);
+	if (bvh_node->left) {
+		init_tree(bvh_node->left);
+		init_tree(bvh_node->right);
 	}
 }
 
-void KD_Node_Debugger::init(const KD_Node * root) {
+void BVHDebugger::init(const BVHNode * root) {
 	init_tree(root);
 
 	glGenBuffers(1, &vbo);
@@ -54,7 +54,7 @@ void KD_Node_Debugger::init(const KD_Node * root) {
 	indices.clear();
 }
 
-void KD_Node_Debugger::draw() const {
+void BVHDebugger::draw() const {
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
